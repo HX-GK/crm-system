@@ -900,7 +900,8 @@ body {
 </head>
 <body>
   <!-- 登录页面 -->
-  <div id="login-page" class="login-page">
+  <div id="network-status" style="position:fixed;top:0;left:0;right:0;padding:8px;text-align:center;font-size:13px;z-index:9999;display:none;"></div>
+<div id="login-page" class="login-page">
     <div class="login-container">
       <div class="login-header">
         <h1>🏢 CRM管理系统</h1>
@@ -1623,6 +1624,51 @@ function renderPagination(total, currentPage, perPage, pageFunc) {
 /**
  * 主应用逻辑
  */
+
+// ===== 网络连通性测试 =====
+async function testConnection() {
+  const statusEl = document.getElementById('network-status');
+  statusEl.style.display = 'block';
+  statusEl.style.background = '#fff3cd';
+  statusEl.style.color = '#856404';
+  statusEl.textContent = '正在检测网络连接...';
+  
+  try {
+    const resp = await fetch(SUPABASE_URL + '/rest/v1/', {
+      method: 'GET',
+      headers: { 'apikey': SUPABASE_ANON_KEY }
+    });
+    if (resp.ok || resp.status === 401 || resp.status === 404 || resp.status === 405) {
+      statusEl.style.background = '#d4edda';
+      statusEl.style.color = '#155724';
+      statusEl.textContent = '✅ Supabase连接正常';
+      setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
+      return true;
+    } else {
+      statusEl.style.background = '#f8d7da';
+      statusEl.style.color = '#721c24';
+      statusEl.textContent = '❌ Supabase连接异常：HTTP ' + resp.status;
+      return false;
+    }
+  } catch (err) {
+    statusEl.style.background = '#f8d7da';
+    statusEl.style.color = '#721c24';
+    statusEl.textContent = '❌ 无法连接Supabase：' + err.message + '（可能需要科学上网）';
+    return false;
+  }
+}
+
+// 全局错误捕获
+window.onerror = function(msg, url, line, col, error) {
+  const statusEl = document.getElementById('network-status');
+  if (statusEl) {
+    statusEl.style.display = 'block';
+    statusEl.style.background = '#f8d7da';
+    statusEl.style.color = '#721c24';
+    statusEl.textContent = '❌ JS错误：' + msg + ' (行' + line + ')';
+  }
+  return false;
+};
 
 // DOM 加载完成后初始化
 document.addEventListener('DOMContentLoaded', async () => {

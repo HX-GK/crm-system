@@ -1490,6 +1490,14 @@ async function handleLogin(e) {
     return;
   }
   
+  // 检查Supabase是否初始化
+  if (!supabase) {
+    errorEl.textContent = 'Supabase未初始化，请检查网络连接后刷新页面';
+    return;
+  }
+  
+  errorEl.textContent = '正在登录...';
+  
   try {
     const { data, error } = await supabase.auth.signInWithPassword({
       email: email,
@@ -1498,7 +1506,7 @@ async function handleLogin(e) {
     
     if (error) {
       console.error('登录错误:', error);
-      errorEl.textContent = error.message || '登录失败';
+      errorEl.textContent = '登录失败：' + (error.message || '未知错误');
       return;
     }
     

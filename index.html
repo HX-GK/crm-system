@@ -5,98 +5,4127 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CRM管理系统</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-    .login-card { background: white; border-radius: 12px; padding: 40px; width: 400px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
-    .login-card h1 { color: #1a73e8; font-size: 22px; margin-bottom: 5px; }
-    .login-card p { color: #999; font-size: 13px; margin-bottom: 25px; }
-    .form-group { margin-bottom: 18px; }
-    .form-group label { display: block; font-size: 13px; color: #333; margin-bottom: 6px; font-weight: 500; }
-    .form-group input { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; }
-    .form-group input:focus { border-color: #1a73e8; }
-    .btn { width: 100%; padding: 12px; background: #1a73e8; color: white; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; font-weight: 500; }
-    .btn:hover { background: #1557b0; }
-    .btn:disabled { background: #ccc; cursor: not-allowed; }
-    #msg { margin-top: 12px; padding: 10px; border-radius: 6px; font-size: 13px; display: none; }
-    #msg.error { display: block; background: #fde8e8; color: #c5221f; }
-    #msg.success { display: block; background: #e6f4ea; color: #137333; }
-    #msg.info { display: block; background: #e8f0fe; color: #1a73e8; }
+/* ===== 全局样式重置 ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --primary: #1a73e8;
+  --primary-dark: #1557b0;
+  --primary-light: #e8f0fe;
+  --success: #34a853;
+  --warning: #fbbc04;
+  --danger: #ea4335;
+  --info: #4285f4;
+  --sidebar-bg: #1a1a2e;
+  --sidebar-hover: #16213e;
+  --sidebar-active: #0f3460;
+  --text-dark: #333;
+  --text-light: #666;
+  --text-white: #fff;
+  --border: #e0e0e0;
+  --bg-light: #f5f7fa;
+  --card-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg-light);
+  color: var(--text-dark);
+  line-height: 1.6;
+}
+
+/* ===== 工具类 ===== */
+.hidden { display: none !important; }
+
+/* ===== 登录页面 ===== */
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+  padding: 20px;
+}
+
+.login-container {
+  background: var(--text-white);
+  border-radius: 16px;
+  padding: 48px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.login-header h1 {
+  font-size: 28px;
+  color: var(--primary);
+  margin-bottom: 8px;
+}
+
+.login-header p {
+  color: var(--text-light);
+  font-size: 14px;
+}
+
+.login-form .form-group {
+  margin-bottom: 20px;
+}
+
+.login-form label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--text-dark);
+}
+
+.login-form input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 15px;
+  transition: border-color 0.3s;
+}
+
+.login-form input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.login-form .btn-primary {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.login-footer {
+  text-align: center;
+  margin-top: 24px;
+  color: var(--text-light);
+  font-size: 13px;
+}
+
+.error-message {
+  color: var(--danger);
+  font-size: 14px;
+  text-align: center;
+  margin-top: 12px;
+  min-height: 20px;
+}
+
+/* ===== 按钮样式 ===== */
+.btn-primary {
+  background: var(--primary);
+  color: var(--text-white);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-primary:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: #f5f5f5;
+  color: var(--text-dark);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-secondary:hover {
+  background: #e8e8e8;
+}
+
+.btn-success {
+  background: var(--success);
+  color: var(--text-white);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-success:hover {
+  background: #2d8f47;
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: var(--text-white);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-danger:hover {
+  background: #d33426;
+}
+
+.btn-warning {
+  background: var(--warning);
+  color: var(--text-dark);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+/* ===== 主应用布局 ===== */
+.main-app {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ===== 侧边栏 ===== */
+.sidebar {
+  width: 260px;
+  background: var(--sidebar-bg);
+  color: var(--text-white);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  height: 100vh;
+  z-index: 100;
+}
+
+.sidebar-header {
+  padding: 24px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-header h2 {
+  font-size: 22px;
+  color: var(--info);
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 16px 0;
+  overflow-y: auto;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 14px 20px;
+  color: rgba(255,255,255,0.7);
+  cursor: pointer;
+  transition: all 0.3s;
+  border-left: 3px solid transparent;
+  gap: 12px;
+}
+
+.nav-item:hover {
+  background: var(--sidebar-hover);
+  color: var(--text-white);
+}
+
+.nav-item.active {
+  background: var(--sidebar-active);
+  color: var(--text-white);
+  border-left-color: var(--info);
+}
+
+.nav-item .icon {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
+}
+
+.sidebar-footer {
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.user-info {
+  margin-bottom: 12px;
+}
+
+#user-name {
+  display: block;
+  font-size: 14px;
+  color: var(--text-white);
+  margin-bottom: 4px;
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  background: var(--info);
+  color: var(--text-white);
+}
+
+.role-badge.admin { background: var(--danger); }
+.role-badge.finance { background: var(--success); }
+.role-badge.logistics { background: var(--warning); color: var(--text-dark); }
+
+.btn-logout {
+  width: 100%;
+  padding: 10px;
+  background: rgba(255,255,255,0.1);
+  color: var(--text-white);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-logout:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+/* ===== 主内容区 ===== */
+.main-content {
+  flex: 1;
+  margin-left: 260px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== 顶部栏 ===== */
+.topbar {
+  background: var(--text-white);
+  padding: 16px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.breadcrumb {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.current-time {
+  font-size: 14px;
+  color: var(--text-light);
+}
+
+/* ===== 流程进度条 ===== */
+.process-bar {
+  background: var(--text-white);
+  padding: 20px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.process-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 0 24px;
+}
+
+.step-icon {
+  font-size: 28px;
+  opacity: 0.4;
+  transition: all 0.3s;
+}
+
+.step-text {
+  font-size: 13px;
+  color: var(--text-light);
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.process-step.active .step-icon {
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+.process-step.active .step-text {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.process-line {
+  width: 60px;
+  height: 2px;
+  background: var(--border);
+}
+
+/* ===== 内容区域 ===== */
+.content-area {
+  flex: 1;
+  padding: 24px 32px;
+}
+
+/* ===== 统计卡片 ===== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: var(--text-white);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--card-shadow);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: transform 0.3s;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+}
+
+.stat-icon {
+  font-size: 40px;
+}
+
+.stat-info h4 {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.stat-info p {
+  font-size: 14px;
+  color: var(--text-light);
+}
+
+/* ===== 模块标题栏 ===== */
+.module-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.module-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.module-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ===== 搜索栏 ===== */
+.search-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 10px 16px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.filter-select {
+  padding: 10px 16px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  background: var(--text-white);
+  cursor: pointer;
+}
+
+/* ===== 数据表格 ===== */
+.table-container {
+  background: var(--text-white);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th {
+  background: var(--bg-light);
+  padding: 14px 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-dark);
+  border-bottom: 2px solid var(--border);
+}
+
+.data-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+
+.data-table tr:hover {
+  background: #f8f9fa;
+}
+
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+
+.table-actions {
+  display: flex;
+  gap: 6px;
+}
+
+/* ===== 状态标签 ===== */
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-badge.pending { background: #fff3e0; color: #e65100; }
+.status-badge.paid { background: #e3f2fd; color: #1565c0; }
+.status-badge.shipped { background: #e8f5e9; color: #2e7d32; }
+.status-badge.settled { background: #f3e5f5; color: #7b1fa2; }
+.status-badge.cancelled { background: #ffebee; color: #c62828; }
+.status-badge.confirmed { background: #e8f5e9; color: #2e7d32; }
+.status-badge.rejected { background: #ffebee; color: #c62828; }
+.status-badge.in_transit { background: #e3f2fd; color: #1565c0; }
+.status-badge.delivered { background: #e8f5e9; color: #2e7d32; }
+.status-badge.unsettled { background: #fff3e0; color: #e65100; }
+.status-badge.partial { background: #e3f2fd; color: #1565c0; }
+.status-badge.invoiced { background: #f3e5f5; color: #7b1fa2; }
+.status-badge.none { background: #f5f5f5; color: #666; }
+
+/* ===== 模态框 ===== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal {
+  background: var(--text-white);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: var(--text-light);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.modal-close:hover {
+  color: var(--text-dark);
+}
+
+.modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* ===== 表单 ===== */
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--text-dark);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.form-group .file-upload {
+  border: 2px dashed var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.form-group .file-upload:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.form-group .file-upload input {
+  display: none;
+}
+
+.form-group .file-preview {
+  margin-top: 12px;
+  max-width: 200px;
+}
+
+.form-group .file-preview img {
+  width: 100%;
+  border-radius: 8px;
+}
+
+/* ===== Toast 提示 ===== */
+.toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--text-dark);
+  color: var(--text-white);
+  padding: 14px 28px;
+  border-radius: 8px;
+  font-size: 14px;
+  z-index: 2000;
+  animation: toastIn 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.toast.success { background: var(--success); }
+.toast.error { background: var(--danger); }
+.toast.warning { background: var(--warning); color: var(--text-dark); }
+
+/* ===== 空状态 ===== */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-light);
+}
+
+.empty-state .icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-state p {
+  font-size: 16px;
+}
+
+/* ===== 分页 ===== */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 20px;
+}
+
+.pagination button {
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  background: var(--text-white);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.pagination button:hover:not(:disabled) {
+  background: var(--primary-light);
+  border-color: var(--primary);
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination button.active {
+  background: var(--primary);
+  color: var(--text-white);
+  border-color: var(--primary);
+}
+
+.pagination span {
+  font-size: 14px;
+  color: var(--text-light);
+}
+
+/* ===== 加载状态 ===== */
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-light);
+}
+
+.loading::after {
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-left: 10px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== 打印样式 ===== */
+@media print {
+  .sidebar, .topbar, .process-bar, .module-actions, .search-bar, .pagination, .btn-group {
+    display: none !important;
+  }
+  
+  .main-content {
+    margin-left: 0 !important;
+  }
+  
+  .content-area {
+    padding: 0 !important;
+  }
+  
+  .table-container {
+    box-shadow: none !important;
+    border: 1px solid #ddd;
+  }
+  
+  .data-table th {
+    background: #f5f5f5 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+/* ===== 响应式 ===== */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s;
+  }
+  
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  
+  .main-content {
+    margin-left: 0;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .process-bar {
+    padding: 16px;
+    overflow-x: auto;
+  }
+  
+  .process-step {
+    padding: 0 12px;
+  }
+  
+  .process-line {
+    width: 30px;
+  }
+  
+  .content-area {
+    padding: 16px;
+  }
+}
+
+/* ===== 最近订单列表（仪表盘专用） ===== */
+.recent-orders {
+  background: var(--text-white);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+}
+
+.recent-orders h3 {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* ===== 用户管理特殊样式 ===== */
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: var(--text-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.role-select {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+}
   </style>
 </head>
 <body>
-  <div class="login-card">
-    <h1>CRM管理系统</h1>
-    <p>客户关系管理与订单追踪系统</p>
-    <div class="form-group">
-      <label>邮箱地址</label>
-      <input type="email" id="email" placeholder="请输入邮箱" value="">
+  <!-- 登录页面 -->
+  <div id="network-status" style="position:fixed;top:0;left:0;right:0;padding:8px;text-align:center;font-size:13px;z-index:9999;display:none;"></div>
+  <div id="login-page" class="login-page">
+    <div class="login-container">
+      <div class="login-header">
+        <h1>🏢 CRM管理系统</h1>
+        <p>客户关系管理与订单追踪系统</p>
+      </div>
+      <form id="login-form" class="login-form">
+        <div class="form-group">
+          <label for="email">📧 邮箱地址</label>
+          <input type="email" id="email" placeholder="请输入邮箱" required>
+        </div>
+        <div class="form-group">
+          <label for="password">🔒 密码</label>
+          <input type="password" id="password" placeholder="请输入密码" required>
+        </div>
+        <button type="submit" class="btn-primary">登 录</button>
+        <div id="login-error" class="error-message"></div>
+      </form>
+      <div class="login-footer">
+        <p>Powered by <strong>Bmob</strong></p>
+      </div>
     </div>
-    <div class="form-group">
-      <label>密码</label>
-      <input type="password" id="password" placeholder="请输入密码" value="">
-    </div>
-    <button class="btn" id="loginBtn" onclick="doLogin()">登录</button>
-    <div id="msg"></div>
   </div>
-<script>
-const SUPABASE_URL = 'https://dcxzcpjcivfocpknsku.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjeHpjcHhqY2l2Zm9jcGtuc2t1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyMDkzNzIsImV4cCI6MjA5Mzc4NTM3Mn0.ByjQzzwmP7PThnSM3gNjwDllqksO_NjfEOhNhpqdlmE';
 
-function showMsg(text, type) {
-  var el = document.getElementById('msg');
-  el.textContent = text;
-  el.className = type;
+  <!-- 主应用界面 -->
+  <div id="main-app" class="main-app hidden">
+    <!-- 左侧导航栏 -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h2>📋 CRM</h2>
+      </div>
+      <nav class="sidebar-nav" id="sidebar-nav">
+        <!-- 动态生成 -->
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-info" id="user-info">
+          <span id="user-name">加载中...</span>
+          <span id="user-role" class="role-badge">-</span>
+        </div>
+        <button id="logout-btn" class="btn-logout">🚪 退出</button>
+      </div>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+      <!-- 顶部栏 -->
+      <header class="topbar">
+        <div class="breadcrumb">
+          <span id="current-module">仪表盘</span>
+        </div>
+        <div class="topbar-actions">
+          <span class="current-time" id="current-time"></span>
+        </div>
+      </header>
+
+      <!-- 流程进度条 -->
+      <div class="process-bar" id="process-bar">
+        <div class="process-step active" data-step="order">
+          <span class="step-icon">📝</span>
+          <span class="step-text">下单</span>
+        </div>
+        <div class="process-line"></div>
+        <div class="process-step" data-step="payment">
+          <span class="step-icon">💳</span>
+          <span class="step-text">转款</span>
+        </div>
+        <div class="process-line"></div>
+        <div class="process-step" data-step="logistics">
+          <span class="step-icon">🚚</span>
+          <span class="step-text">派车</span>
+        </div>
+        <div class="process-line"></div>
+        <div class="process-step" data-step="finance">
+          <span class="step-icon">📊</span>
+          <span class="step-text">结算</span>
+        </div>
+      </div>
+
+      <!-- 内容区域 -->
+      <div class="content-area" id="content-area">
+        <!-- 动态加载模块内容 -->
+      </div>
+    </main>
+  </div>
+
+  <!-- 通用模态框 -->
+  <div id="modal-overlay" class="modal-overlay hidden">
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <h3 id="modal-title">模态框</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="modal-body">
+        <!-- 动态内容 -->
+      </div>
+      <div class="modal-footer" id="modal-footer">
+        <button class="btn-secondary" onclick="closeModal()">取消</button>
+        <button class="btn-primary" id="modal-confirm">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast 提示 -->
+  <div id="toast" class="toast hidden">
+    <span id="toast-message"></span>
+  </div>
+
+  <!-- Bmob JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/hydrogen-js-sdk@latest/dist/Bmob-1.0.1.min.js"></script>
+  <script>
+/**
+ * ========================================
+ * Bmob 配置
+ * ========================================
+ * 请替换为你自己的 Bmob 应用凭证
+ * 注册地址: https://www.bmobapp.com/
+ */
+
+// ⚠️ 请替换为你自己的 Bmob Application ID
+const BMOB_APP_ID = '6ec6ebd86bd579ec8842ac3315a8c825';
+
+// ⚠️ 请替换为你自己的 Bmob REST API Key
+const BMOB_REST_KEY = '40b75b71fd18ee7b836c3493c4fa4987';
+
+// 初始化 Bmob
+Bmob.initialize(BMOB_APP_ID, BMOB_REST_KEY);
+
+// ========================================
+// 类名常量（对应 Bmob 数据表）
+// ========================================
+const CLASS_NAMES = {
+  CUSTOMER: 'Customer',      // 客户表
+  ORDER: 'Order',           // 订单表
+  PAYMENT: 'Payment',       // 转款记录表
+  LOGISTICS: 'Logistics',    // 物流记录表
+  FINANCE: 'Finance',        // 财务结算表
+  USER_ROLE: 'UserRole'      // 用户角色表
+};
+
+/**
+ * ========================================
+ * Bmob 数据操作封装（Promise化）
+ * ========================================
+ */
+
+// 将 Bmob 回调风格的 API 转为 Promise
+function bmobQuery(className, options = {}) {
+  return new Promise((resolve, reject) => {
+    const query = new Bmob.Query(className);
+    
+    if (options.equalTo) {
+      for (const [key, val] of Object.entries(options.equalTo)) {
+        query.equalTo(key, val);
+      }
+    }
+    
+    if (options.notEqualTo) {
+      for (const [key, val] of Object.entries(options.notEqualTo)) {
+        query.notEqualTo(key, val);
+      }
+    }
+    
+    if (options.greaterThanOrEqualTo) {
+      for (const [key, val] of Object.entries(options.greaterThanOrEqualTo)) {
+        query.greaterThanOrEqualTo(key, val);
+      }
+    }
+    
+    if (options.include) {
+      query.include(options.include);
+    }
+    
+    if (options.order) {
+      const orders = options.order.split(',');
+      orders.forEach(orderStr => {
+        const trimmed = orderStr.trim();
+        if (trimmed.startsWith('-')) {
+          query.descending(trimmed.substring(1));
+        } else {
+          query.ascending(trimmed);
+        }
+      });
+    } else {
+      query.descending('createdAt');
+    }
+    
+    if (options.limit) {
+      query.limit(options.limit);
+    }
+    
+    if (options.skip) {
+      query.skip(options.skip);
+    }
+    
+    if (options.count) {
+      query.count({
+        success: (count) => resolve({ count, data: [], error: null }),
+        error: (err) => reject(err)
+      });
+    } else {
+      query.find({
+        success: (results) => resolve({ data: results, count: results.length, error: null }),
+        error: (err) => reject(err)
+      });
+    }
+  });
 }
 
-async function doLogin() {
-  var email = document.getElementById('email').value.trim();
-  var password = document.getElementById('password').value;
-  var btn = document.getElementById('loginBtn');
+// 创建记录
+function bmobCreate(className, data) {
+  return new Promise((resolve, reject) => {
+    const Klass = Bmob.Object.extend(className);
+    const obj = new Klass();
+    
+    for (const [key, val] of Object.entries(data)) {
+      if (val !== null && val !== undefined) {
+        // Bmob 的 Pointer 类型直接传入 Bmob.Object
+        if (val && typeof val === 'object' && val.className) {
+          obj.set(key, val);
+        } else {
+          obj.set(key, val);
+        }
+      }
+    }
+    
+    obj.save(null, {
+      success: (result) => resolve({ data: result, error: null }),
+      error: (err) => reject(err)
+    });
+  });
+}
+
+// 更新记录
+function bmobUpdate(className, objectId, data) {
+  return new Promise((resolve, reject) => {
+    const query = new Bmob.Query(className);
+    query.get(objectId, {
+      success: (obj) => {
+        for (const [key, val] of Object.entries(data)) {
+          if (val !== null && val !== undefined) {
+            if (val && typeof val === 'object' && val.className) {
+              obj.set(key, val);
+            } else {
+              obj.set(key, val);
+            }
+          }
+        }
+        obj.save(null, {
+          success: (result) => resolve({ data: result, error: null }),
+          error: (err) => reject(err)
+        });
+      },
+      error: (err) => reject(err)
+    });
+  });
+}
+
+// 删除记录
+function bmobDelete(className, objectId) {
+  return new Promise((resolve, reject) => {
+    const query = new Bmob.Query(className);
+    query.get(objectId, {
+      success: (obj) => {
+        obj.destroy({
+          success: () => resolve({ data: true, error: null }),
+          error: (err) => reject(err)
+        });
+      },
+      error: (err) => reject(err)
+    });
+  });
+}
+
+// 获取单条记录
+function bmobGet(className, objectId) {
+  return new Promise((resolve, reject) => {
+    const query = new Bmob.Query(className);
+    query.get(objectId, {
+      success: (obj) => resolve({ data: obj, error: null }),
+      error: (err) => reject(err)
+    });
+  });
+}
+
+// Upsert（存在则更新，不存在则创建）
+function bmobUpsert(className, conditions, data) {
+  return new Promise((resolve, reject) => {
+    const query = new Bmob.Query(className);
+    
+    for (const [key, val] of Object.entries(conditions)) {
+      query.equalTo(key, val);
+    }
+    
+    query.find({
+      success: (results) => {
+        if (results.length > 0) {
+          // 更新
+          const obj = results[0];
+          for (const [key, val] of Object.entries(data)) {
+            if (val !== null && val !== undefined) {
+              obj.set(key, val);
+            }
+          }
+          obj.save(null, {
+            success: (result) => resolve({ data: result, error: null }),
+            error: (err) => reject(err)
+          });
+        } else {
+          // 创建
+          const Klass = Bmob.Object.extend(className);
+          const obj = new Klass();
+          for (const [key, val] of Object.entries({ ...conditions, ...data })) {
+            if (val !== null && val !== undefined) {
+              obj.set(key, val);
+            }
+          }
+          obj.save(null, {
+            success: (result) => resolve({ data: result, error: null }),
+            error: (err) => reject(err)
+          });
+        }
+      },
+      error: (err) => reject(err)
+    });
+  });
+}
+
+// 文件上传
+function bmobUploadFile(file) {
+  return new Promise((resolve, reject) => {
+    const ext = file.name.split('.').pop();
+    const fileName = `${generateUUID()}.${ext}`;
+    const bmobFile = new Bmob.File(fileName, file);
+    
+    bmobFile.save().then((obj) => {
+      const url = obj._url || obj.url || obj.get('url');
+      resolve({ data: url, error: null });
+    }).catch((err) => reject(err));
+  });
+}
+
+// 检查配置
+function checkConfig() {
+  if (BMOB_APP_ID === 'YOUR_APP_ID' || BMOB_REST_KEY === 'YOUR_REST_API_KEY') {
+    console.warn('⚠️ 请先配置 Bmob Application ID 和 REST API Key');
+    return false;
+  }
+  return true;
+}
+
+/**
+ * ========================================
+ * 兼容层：保持原有的函数名（lcQuery -> bmobQuery 等）
+ * ========================================
+ */
+const lcQuery = bmobQuery;
+const lcCreate = bmobCreate;
+const lcUpdate = bmobUpdate;
+const lcDelete = bmobDelete;
+const lcGet = bmobGet;
+const lcUpsert = bmobUpsert;
+const lcUploadFile = bmobUploadFile;
+
+/**
+ * ========================================
+ * 工具函数
+ * ========================================
+ */
+
+// 全局状态
+let currentUser = null;
+let currentUserId = null;
+let currentRole = 'logistics';
+
+/**
+ * 显示 Toast 提示
+ */
+function showToast(message, type = 'info') {
+  const toast = document.getElementById('toast');
+  const toastMessage = document.getElementById('toast-message');
   
-  if (!email || !password) {
-    showMsg('请输入邮箱和密码', 'error');
+  toast.className = `toast ${type}`;
+  toastMessage.textContent = message;
+  toast.classList.remove('hidden');
+  
+  setTimeout(() => {
+    toast.classList.add('hidden');
+  }, 3000);
+}
+
+/**
+ * 格式化日期时间
+ */
+function formatDateTime(date) {
+  if (!date) return '-';
+  let d;
+  if (date instanceof Date) {
+    d = date;
+  } else {
+    d = new Date(date);
+  }
+  if (isNaN(d.getTime())) return '-';
+  return d.toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+
+/**
+ * 格式化日期
+ */
+function formatDate(date) {
+  if (!date) return '-';
+  let d;
+  if (date instanceof Date) {
+    d = date;
+  } else {
+    d = new Date(date);
+  }
+  if (isNaN(d.getTime())) return '-';
+  return d.toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  });
+}
+
+/**
+ * 格式化金额
+ */
+function formatCurrency(amount) {
+  if (amount === null || amount === undefined) return '¥0.00';
+  return '¥' + parseFloat(amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+/**
+ * 获取状态文本
+ */
+function getStatusText(status, type = 'order') {
+  const statusMap = {
+    order: {
+      pending: '待处理',
+      paid: '已付款',
+      shipped: '已发货',
+      settled: '已结算',
+      cancelled: '已取消'
+    },
+    payment: {
+      pending: '待审核',
+      confirmed: '已确认',
+      rejected: '已拒绝'
+    },
+    logistics: {
+      pending: '待派车',
+      in_transit: '运输中',
+      delivered: '已送达'
+    },
+    finance: {
+      unsettled: '未结算',
+      partial: '部分结算',
+      settled: '已结算'
+    },
+    invoice: {
+      none: '未开票',
+      invoiced: '已开票'
+    }
+  };
+  
+  return statusMap[type]?.[status] || status;
+}
+
+/**
+ * 生成UUID
+ */
+function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+/**
+ * 打开模态框
+ */
+function openModal(title, content, onConfirm, showCancel = true) {
+  const overlay = document.getElementById('modal-overlay');
+  const modalTitle = document.getElementById('modal-title');
+  const modalBody = document.getElementById('modal-body');
+  const modalFooter = document.getElementById('modal-footer');
+  
+  modalTitle.textContent = title;
+  modalBody.innerHTML = content;
+  
+  if (showCancel) {
+    modalFooter.innerHTML = `
+      <button class="btn-secondary" onclick="closeModal()">取消</button>
+      <button class="btn-primary" id="modal-confirm-btn">确定</button>
+    `;
+  } else {
+    modalFooter.innerHTML = `
+      <button class="btn-primary" id="modal-confirm-btn">确定</button>
+    `;
+  }
+  
+  overlay.classList.remove('hidden');
+  
+  if (onConfirm) {
+    document.getElementById('modal-confirm-btn').addEventListener('click', () => {
+      onConfirm();
+    });
+  }
+}
+
+/**
+ * 关闭模态框
+ */
+function closeModal() {
+  document.getElementById('modal-overlay').classList.add('hidden');
+}
+
+/**
+ * 确认对话框
+ */
+function confirm(message, onConfirm) {
+  openModal('确认操作', `<p style="text-align:center;padding:20px;">${message}</p>`, onConfirm);
+}
+
+/**
+ * 导出数据为 CSV
+ */
+function exportToCSV(data, filename, headers) {
+  if (!data || data.length === 0) {
+    showToast('没有数据可导出', 'warning');
     return;
   }
   
-  btn.disabled = true;
-  btn.textContent = '登录中...';
-  showMsg('正在连接服务器...', 'info');
+  // UTF-8 BOM
+  const BOM = '\uFEFF';
   
-  try {
-    var resp = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
-      method: 'POST',
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ email: email, password: password })
+  // 表头
+  let csv = BOM + headers.map(h => h.title).join(',') + '\n';
+  
+  // 数据行
+  data.forEach(row => {
+    const values = headers.map(h => {
+      let val = row[h.key] || '';
+      // 处理包含逗号或引号的值
+      if (typeof val === 'string' && (val.includes(',') || val.includes('"') || val.includes('\n'))) {
+        val = '"' + val.replace(/"/g, '""') + '"';
+      }
+      return val;
     });
-    
-    var data = await resp.json();
-    
-    if (data.error) {
-      showMsg('登录失败: ' + (data.error_description || data.error.message || JSON.stringify(data.error)), 'error');
-      btn.disabled = false;
-      btn.textContent = '登录';
-      return;
-    }
-    
-    if (data.access_token) {
-      localStorage.setItem('sb_access_token', data.access_token);
-      localStorage.setItem('sb_refresh_token', data.refresh_token);
-      showMsg('登录成功！', 'success');
-      setTimeout(function() { window.location.reload(); }, 1500);
-    } else {
-      showMsg('未知响应: ' + JSON.stringify(data).substring(0, 200), 'error');
-      btn.disabled = false;
-      btn.textContent = '登录';
-    }
-  } catch (err) {
-    showMsg('网络错误: ' + err.message + ' (Supabase可能无法访问，请检查网络)', 'error');
-    btn.disabled = false;
-    btn.textContent = '登录';
+    csv += values.join(',') + '\n';
+  });
+  
+  // 下载
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `${filename}_${formatDate(new Date()).replace(/\//g, '')}.csv`;
+  link.click();
+}
+
+/**
+ * 打印当前内容
+ */
+function printContent() {
+  window.print();
+}
+
+/**
+ * 生成表格操作按钮 HTML
+ */
+function getActionButtons(row, config) {
+  let buttons = '';
+  
+  if (config.onEdit && canEdit()) {
+    buttons += `<button class="btn-sm btn-secondary" onclick="${config.onEdit}(${JSON.stringify(row).replace(/"/g, '&quot;')})">编辑</button>`;
+  }
+  
+  if (config.onDelete && canDelete()) {
+    buttons += `<button class="btn-sm btn-danger" onclick="${config.onDelete}('${row.id}')">删除</button>`;
+  }
+  
+  if (config.onView) {
+    buttons += `<button class="btn-sm btn-secondary" onclick="${config.onView}(${JSON.stringify(row).replace(/"/g, '&quot;')})">查看</button>`;
+  }
+  
+  return buttons;
+}
+
+/**
+ * 权限检查
+ */
+function canEdit() {
+  return currentRole === 'admin' || currentRole === 'finance' || currentRole === 'logistics';
+}
+
+function canDelete() {
+  return currentRole === 'admin';
+}
+
+function canReview() {
+  return currentRole === 'admin' || currentRole === 'finance';
+}
+
+function canManageUsers() {
+  return currentRole === 'admin';
+}
+
+/**
+ * 更新流程进度条
+ */
+function updateProcessBar(pendingPayments, inTransitLogistics, unsettledFinance) {
+  const steps = {
+    order: document.querySelector('[data-step="order"]'),
+    payment: document.querySelector('[data-step="payment"]'),
+    logistics: document.querySelector('[data-step="logistics"]'),
+    finance: document.querySelector('[data-step="finance"]')
+  };
+  
+  // 重置所有步骤
+  Object.values(steps).forEach(step => step.classList.remove('active'));
+  
+  // 根据数据状态激活步骤
+  if (pendingPayments > 0 || inTransitLogistics > 0 || unsettledFinance > 0) {
+    steps.order.classList.add('active');
+  }
+  if (inTransitLogistics > 0 || unsettledFinance > 0) {
+    steps.payment.classList.add('active');
+  }
+  if (unsettledFinance > 0) {
+    steps.logistics.classList.add('active');
   }
 }
-</script>
+
+/**
+ * 防抖函数
+ */
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+/**
+ * 获取用户角色信息
+ */
+async function fetchUserRole(userId) {
+  try {
+    const result = await bmobQuery(CLASS_NAMES.USER_ROLE, {
+      equalTo: { userId: userId }
+    });
+    
+    return result.data?.[0]?.get('role') || 'logistics';
+  } catch (err) {
+    console.error('获取用户角色失败:', err);
+    return 'logistics';
+  }
+}
+
+/**
+ * 渲染分页组件
+ */
+function renderPagination(total, currentPage, perPage, pageFunc) {
+  const totalPages = Math.ceil(total / perPage);
+  if (totalPages <= 1) return '';
+  
+  const pages = [];
+  for (let i = 1; i <= totalPages; i++) {
+    pages.push(i);
+  }
+  
+  return `
+    <div class="pagination">
+      <button ${currentPage === 1 ? 'disabled' : ''} onclick="${pageFunc}(${currentPage - 1})">上一页</button>
+      ${pages.map(p => `
+        <button class="${p === currentPage ? 'active' : ''}" onclick="${pageFunc}(${p})">${p}</button>
+      `).join('')}
+      <button ${currentPage === totalPages ? 'disabled' : ''} onclick="${pageFunc}(${currentPage + 1})">下一页</button>
+      <span>共 ${total} 条</span>
+    </div>
+  `;
+}
+
+/**
+ * 将 Bmob.Object 转换为普通对象
+ */
+function bmobObjectToPlain(obj) {
+  if (!obj) return null;
+  const plain = {};
+  // 获取所有属性
+  if (typeof obj.toJSON === 'function') {
+    const json = obj.toJSON();
+    Object.assign(plain, json);
+  }
+  // 设置 id
+  plain.id = obj.id || obj.get('objectId');
+  // 处理关联对象
+  const keys = obj.attributes ? Object.keys(obj.attributes) : [];
+  for (const key of keys) {
+    const val = obj.get(key);
+    if (val && typeof val === 'object' && val.id) {
+      plain[key + '_id'] = val.id;
+    }
+  }
+  return plain;
+}
+
+/**
+ * 批量转换 Bmob.Object 数组
+ */
+function bmobArrayToPlain(arr) {
+  if (!Array.isArray(arr)) return [];
+  return arr.map(item => bmobObjectToPlain(item));
+}
+
+/**
+ * 兼容层
+ */
+const avObjectToPlain = bmobObjectToPlain;
+const avArrayToPlain = bmobArrayToPlain;
+
+/**
+ * ========================================
+ * 主应用逻辑
+ * ========================================
+ */
+
+// 网络连通性测试
+async function testConnection() {
+  const statusEl = document.getElementById('network-status');
+  statusEl.style.display = 'block';
+  statusEl.style.background = '#fff3cd';
+  statusEl.style.color = '#856404';
+  statusEl.textContent = '正在检测网络连接...';
+  
+  try {
+    // 尝试获取当前用户来测试连接
+    const user = Bmob.User.current();
+    statusEl.style.background = '#d4edda';
+    statusEl.style.color = '#155724';
+    statusEl.textContent = '✅ Bmob连接正常';
+    setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
+    return true;
+  } catch (err) {
+    statusEl.style.background = '#f8d7da';
+    statusEl.style.color = '#721c24';
+    statusEl.textContent = '❌ Bmob连接异常：' + err.message;
+    return false;
+  }
+}
+
+// 全局错误捕获
+window.onerror = function(msg, url, line, col, error) {
+  const statusEl = document.getElementById('network-status');
+  if (statusEl) {
+    statusEl.style.display = 'block';
+    statusEl.style.background = '#f8d7da';
+    statusEl.style.color = '#721c24';
+    statusEl.textContent = '❌ JS错误：' + msg + ' (行' + line + ')';
+  }
+  return false;
+};
+
+// DOM 加载完成后初始化
+document.addEventListener('DOMContentLoaded', async () => {
+  // 检查配置
+  if (!checkConfig()) {
+    document.getElementById('login-error').textContent = '请先配置 Bmob 连接信息';
+    return;
+  }
+  
+  // 检查登录状态
+  const user = Bmob.User.current();
+  
+  if (user) {
+    // 已登录
+    currentUser = user;
+    currentUserId = user.id;
+    await handleLoginSuccess(currentUser);
+  } else {
+    // 未登录，显示登录页面
+    showLoginPage();
+  }
+  
+  // 登录表单提交
+  document.getElementById('login-form').addEventListener('submit', handleLogin);
+  
+  // 退出按钮
+  document.getElementById('logout-btn').addEventListener('click', handleLogout);
+});
+
+/**
+ * 显示登录页面
+ */
+function showLoginPage() {
+  document.getElementById('login-page').classList.remove('hidden');
+  document.getElementById('main-app').classList.add('hidden');
+}
+
+/**
+ * 显示主应用
+ */
+function showMainApp() {
+  document.getElementById('login-page').classList.add('hidden');
+  document.getElementById('main-app').classList.remove('hidden');
+  
+  // 更新导航和用户信息
+  updateNavigation();
+  updateClock();
+}
+
+/**
+ * 处理登录成功
+ */
+async function handleLoginSuccess(user) {
+  // 获取用户角色
+  currentRole = await fetchUserRole(user.id);
+  
+  // 更新用户信息显示
+  // Bmob使用username字段，我们把邮箱当username用
+  const userName = user.get('username') || user.get('email')?.split('@')[0] || '用户';
+  document.getElementById('user-name').textContent = userName;
+  document.getElementById('user-role').textContent = getRoleName(currentRole);
+  document.getElementById('user-role').className = `role-badge ${currentRole}`;
+  
+  // 显示主应用
+  showMainApp();
+  
+  // 加载仪表盘
+  loadDashboard();
+}
+
+/**
+ * 获取角色名称
+ */
+function getRoleName(role) {
+  const names = {
+    admin: '管理员',
+    finance: '财务',
+    logistics: '物流'
+  };
+  return names[role] || role;
+}
+
+/**
+ * 处理登录
+ */
+async function handleLogin(e) {
+  e.preventDefault();
+  
+  // Bmob使用username登录，我们把邮箱当username
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const errorEl = document.getElementById('login-error');
+  
+  errorEl.textContent = '';
+  
+  if (!email || !password) {
+    errorEl.textContent = '请输入邮箱和密码';
+    return;
+  }
+  
+  errorEl.textContent = '正在登录...';
+  
+  try {
+    // 使用 Bmob 登录（Bmob使用username字段）
+    const user = await new Promise((resolve, reject) => {
+      Bmob.User.logIn(email, password, {
+        success: (user) => resolve(user),
+        error: (user, err) => reject(err)
+      });
+    });
+    
+    currentUser = user;
+    currentUserId = user.id;
+    await handleLoginSuccess(currentUser);
+    showToast('登录成功', 'success');
+  } catch (err) {
+    console.error('登录异常:', err);
+    let errorMsg = '登录失败';
+    if (err.error) {
+      errorMsg = err.error;
+    } else if (err.message) {
+      errorMsg = err.message;
+    }
+    errorEl.textContent = errorMsg;
+  }
+}
+
+/**
+ * 处理退出登录
+ */
+async function handleLogout() {
+  Bmob.User.logOut();
+  currentUser = null;
+  currentUserId = null;
+  showLoginPage();
+  showToast('已退出登录', 'success');
+}
+
+/**
+ * 渲染统计卡片
+ */
+function renderStatCard(icon, value, label, color = 'primary') {
+  const colors = {
+    primary: '#1a73e8',
+    success: '#34a853',
+    warning: '#fbbc04',
+    danger: '#ea4335',
+    info: '#4285f4'
+  };
+  
+  return `
+    <div class="stat-card">
+      <div class="stat-icon" style="color: ${colors[color]}">${icon}</div>
+      <div class="stat-info">
+        <h4>${value}</h4>
+        <p>${label}</p>
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * 渲染数据表格
+ */
+function renderTable(headers, data, actions = []) {
+  if (!data || data.length === 0) {
+    return `
+      <div class="empty-state">
+        <div class="icon">📭</div>
+        <p>暂无数据</p>
+      </div>
+    `;
+  }
+  
+  const thead = `
+    <thead>
+      <tr>
+        ${headers.map(h => `<th>${h.title}</th>`).join('')}
+        ${actions.length > 0 ? '<th>操作</th>' : ''}
+      </tr>
+    </thead>
+  `;
+  
+  const tbody = data.map(row => {
+    const rowId = row.id || row.get?.('objectId') || row.objectId;
+    const rowData = bmobObjectToPlain(row);
+    
+    return `
+      <tr data-id="${rowId}">
+        ${headers.map(h => {
+          let value = rowData[h.key];
+          if (h.render) {
+            value = h.render(value, rowData);
+          } else if (h.type === 'status') {
+            value = `<span class="status-badge ${value || 'none'}">${getStatusText(value, h.statusType)}</span>`;
+          } else if (h.type === 'currency') {
+            value = formatCurrency(value);
+          } else if (h.type === 'datetime') {
+            value = formatDateTime(value);
+          } else if (h.type === 'date') {
+            value = formatDate(value);
+          } else if (value === null || value === undefined) {
+            value = '-';
+          }
+          return `<td>${value}</td>`;
+        }).join('')}
+        ${actions.length > 0 ? `<td class="table-actions">${actions.map(a => {
+          if (a.condition && !a.condition(rowData)) return '';
+          return `<button class="btn-sm ${a.class}" onclick="${a.handler}(${JSON.stringify(rowData).replace(/"/g, '&quot;')})">${a.text}</button>`;
+        }).join('')}</td>` : ''}
+      </tr>
+    `;
+  }).join('');
+  
+  return `
+    <div class="table-container">
+      <table class="data-table">
+        ${thead}
+        <tbody>
+          ${tbody}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+/**
+ * 生成表单HTML
+ */
+function generateFormHTML(fields, data = {}) {
+  return fields.map(field => {
+    let value = data[field.name];
+    if (value === undefined || value === null) {
+      value = field.default || '';
+    }
+    
+    let input = '';
+    
+    switch (field.type) {
+      case 'select':
+        input = `
+          <select name="${field.name}" id="field-${field.name}" ${field.required ? 'required' : ''}>
+            ${field.options.map(opt => `
+              <option value="${opt.value}" ${value === opt.value ? 'selected' : ''}>${opt.label}</option>
+            `).join('')}
+          </select>
+        `;
+        break;
+      case 'textarea':
+        input = `
+          <textarea name="${field.name}" id="field-${field.name}" ${field.required ? 'required' : ''}>${value}</textarea>
+        `;
+        break;
+      case 'file':
+        input = `
+          <div class="file-upload" onclick="document.getElementById('field-${field.name}').click()">
+            <input type="file" name="${field.name}" id="field-${field.name}" accept="image/*" onchange="handleFileSelect(this)">
+            <p>点击选择图片（最大5MB）</p>
+          </div>
+          <div class="file-preview hidden" id="preview-${field.name}">
+            <img id="preview-img-${field.name}" src="" alt="预览">
+          </div>
+        `;
+        break;
+      case 'readonly':
+        input = `<input type="text" value="${value}" readonly>`;
+        break;
+      default:
+        input = `<input type="${field.type || 'text'}" name="${field.name}" id="field-${field.name}" value="${value}" ${field.required ? 'required' : ''} ${field.placeholder ? `placeholder="${field.placeholder}"` : ''}>`;
+    }
+    
+    return `
+      <div class="form-group">
+        <label>${field.label}</label>
+        ${input}
+      </div>
+    `;
+  }).join('');
+}
+
+/**
+ * 处理文件选择预览
+ */
+function handleFileSelect(input) {
+  const file = input.files[0];
+  if (!file) return;
+  
+  // 检查文件大小（5MB）
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('图片大小不能超过5MB', 'error');
+    input.value = '';
+    return;
+  }
+  
+  // 检查文件类型
+  if (!file.type.startsWith('image/')) {
+    showToast('请选择图片文件', 'error');
+    input.value = '';
+    return;
+  }
+  
+  // 预览
+  const preview = document.getElementById(`preview-${input.name}`);
+  const previewImg = document.getElementById(`preview-img-${input.name}`);
+  
+  if (preview && previewImg) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      previewImg.src = e.target.result;
+      preview.classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+/**
+ * 从表单获取数据
+ */
+function getFormData(fields) {
+  const data = {};
+  fields.forEach(field => {
+    const input = document.getElementById(`field-${field.name}`);
+    if (input) {
+      data[field.name] = input.value;
+    }
+  });
+  return data;
+}
+
+/**
+ * 更新时钟
+ */
+function updateClock() {
+  const timeEl = document.getElementById('current-time');
+  if (timeEl) {
+    setInterval(() => {
+      const now = new Date();
+      timeEl.textContent = now.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+    }, 1000);
+  }
+}
+
+/**
+ * 更新导航
+ */
+function updateNavigation() {
+  const nav = document.getElementById('sidebar-nav');
+  
+  const menuItems = [
+    { id: 'dashboard', icon: '📊', label: '仪表盘', handler: 'loadDashboard' },
+    { id: 'customers', icon: '👥', label: '客户管理', handler: 'loadCustomers' },
+    { id: 'orders', icon: '📋', label: '订单管理', handler: 'loadOrders' },
+    { id: 'payments', icon: '💳', label: '转款确认', handler: 'loadPayments' },
+    { id: 'logistics', icon: '🚚', label: '物流派车', handler: 'loadLogistics' },
+    { id: 'finance', icon: '💰', label: '财务结算', handler: 'loadFinance' }
+  ];
+  
+  // 只有管理员可以看到用户管理
+  if (currentRole === 'admin') {
+    menuItems.push({ id: 'users', icon: '⚙️', label: '用户管理', handler: 'loadUsers' });
+  }
+  
+  nav.innerHTML = menuItems.map(item => `
+    <div class="nav-item" data-module="${item.id}" onclick="switchModule('${item.id}', '${item.handler}')">
+      <span class="icon">${item.icon}</span>
+      <span>${item.label}</span>
+    </div>
+  `).join('');
+  
+  // 默认激活仪表盘
+  const dashboardItem = nav.querySelector('[data-module="dashboard"]');
+  if (dashboardItem) {
+    dashboardItem.classList.add('active');
+  }
+}
+
+/**
+ * 切换模块
+ */
+function switchModule(moduleId, handler) {
+  // 更新导航高亮
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.classList.remove('active');
+  });
+  const activeItem = document.querySelector(`[data-module="${moduleId}"]`);
+  if (activeItem) {
+    activeItem.classList.add('active');
+  }
+  
+  // 更新面包屑
+  const navItems = {
+    dashboard: '仪表盘',
+    customers: '客户管理',
+    orders: '订单管理',
+    payments: '转款确认',
+    logistics: '物流派车',
+    finance: '财务结算',
+    users: '用户管理'
+  };
+  document.getElementById('current-module').textContent = navItems[moduleId] || moduleId;
+  
+  // 调用模块加载函数
+  if (typeof window[handler] === 'function') {
+    window[handler]();
+  }
+}
+
+/**
+ * ========================================
+ * 仪表盘模块
+ * ========================================
+ */
+
+async function loadDashboard() {
+  const content = document.getElementById('content-area');
+  content.innerHTML = '<div class="loading">加载中...</div>';
+  
+  try {
+    // 并行获取各项统计数据
+    const [customersCount, ordersCount, pendingPaymentsCount, inTransitCount, unsettledAmount, recentOrders] = await Promise.all([
+      fetchCustomersCount(),
+      fetchOrdersCount(),
+      fetchPendingPaymentsCount(),
+      fetchInTransitCount(),
+      fetchUnsettledAmount(),
+      fetchRecentOrders()
+    ]);
+    
+    // 更新流程进度条
+    updateProcessBar(pendingPaymentsCount, inTransitCount, unsettledAmount);
+    
+    // 渲染仪表盘
+    content.innerHTML = `
+      <div class="stats-grid">
+        ${renderStatCard('👥', customersCount, '客户总数', 'primary')}
+        ${renderStatCard('📋', ordersCount, '本月订单', 'info')}
+        ${renderStatCard('⏳', pendingPaymentsCount, '待审核转款', 'warning')}
+        ${renderStatCard('🚚', inTransitCount, '运输中物流', 'success')}
+        ${renderStatCard('💰', formatCurrency(unsettledAmount), '待结算金额', 'danger')}
+      </div>
+      
+      <div class="recent-orders">
+        <h3>📋 最近订单</h3>
+        ${renderRecentOrdersTable(recentOrders)}
+      </div>
+    `;
+  } catch (err) {
+    console.error('加载仪表盘失败:', err);
+    content.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">❌</div>
+        <p>加载失败，请刷新重试</p>
+      </div>
+    `;
+  }
+}
+
+// 获取客户总数
+async function fetchCustomersCount() {
+  try {
+    const result = await bmobQuery(CLASS_NAMES.CUSTOMER, { count: true });
+    return result.count || 0;
+  } catch (err) {
+    console.error('获取客户数失败:', err);
+    return 0;
+  }
+}
+
+// 获取本月订单数
+async function fetchOrdersCount() {
+  try {
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+    
+    const result = await bmobQuery(CLASS_NAMES.ORDER, {
+      count: true,
+      greaterThanOrEqualTo: { createdAt: startOfMonth }
+    });
+    return result.count || 0;
+  } catch (err) {
+    console.error('获取订单数失败:', err);
+    return 0;
+  }
+}
+
+// 获取待审核转款数
+async function fetchPendingPaymentsCount() {
+  try {
+    const result = await bmobQuery(CLASS_NAMES.PAYMENT, {
+      count: true,
+      equalTo: { status: 'pending' }
+    });
+    return result.count || 0;
+  } catch (err) {
+    console.error('获取待审核转款数失败:', err);
+    return 0;
+  }
+}
+
+// 获取运输中物流数
+async function fetchInTransitCount() {
+  try {
+    const result = await bmobQuery(CLASS_NAMES.LOGISTICS, {
+      count: true,
+      equalTo: { status: 'in_transit' }
+    });
+    return result.count || 0;
+  } catch (err) {
+    console.error('获取运输中物流数失败:', err);
+    return 0;
+  }
+}
+
+// 获取待结算金额
+async function fetchUnsettledAmount() {
+  try {
+    const result = await bmobQuery(CLASS_NAMES.FINANCE, {
+      notEqualTo: { settlementStatus: 'settled' }
+    });
+    const data = bmobArrayToPlain(result.data);
+    return (data || []).reduce((sum, item) => sum + (parseFloat(item.unpaidAmount) || 0), 0);
+  } catch (err) {
+    console.error('获取待结算金额失败:', err);
+    return 0;
+  }
+}
+
+// 获取最近订单
+async function fetchRecentOrders() {
+  try {
+    const result = await bmobQuery(CLASS_NAMES.ORDER, {
+      order: '-createdAt',
+      limit: 10,
+      include: 'customer'
+    });
+    const data = bmobArrayToPlain(result.data);
+    // 关联客户信息
+    return data.map(order => {
+      const plain = { ...order };
+      if (order.customer) {
+        plain.customerId = order.customer.id || order.customer.objectId;
+        // Bmob的关联对象需要单独获取
+        plain.customerName = order.customer.name || '';
+      }
+      return plain;
+    });
+  } catch (err) {
+    console.error('获取最近订单失败:', err);
+    return [];
+  }
+}
+
+// 渲染最近订单表格
+function renderRecentOrdersTable(orders) {
+  if (!orders || orders.length === 0) {
+    return `
+      <div class="empty-state">
+        <div class="icon">📭</div>
+        <p>暂无订单</p>
+      </div>
+    `;
+  }
+  
+  const headers = [
+    { title: '订单号', key: 'orderNo' },
+    { title: '客户', key: 'customerName' },
+    { title: '产品', key: 'product' },
+    { title: '金额', key: 'amount', type: 'currency' },
+    { title: '状态', key: 'status', type: 'status', statusType: 'order' },
+    { title: '时间', key: 'createdAt', type: 'datetime' }
+  ];
+  
+  return `
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            ${headers.map(h => `<th>${h.title}</th>`).join('')}
+          </tr>
+        </thead>
+        <tbody>
+          ${orders.map(order => `
+            <tr>
+              ${headers.map(h => {
+                let value = order[h.key];
+                if (h.type === 'status') {
+                  value = `<span class="status-badge ${value}">${getStatusText(value, 'order')}</span>`;
+                } else if (h.type === 'currency') {
+                  value = formatCurrency(value);
+                } else if (h.type === 'datetime') {
+                  value = formatDateTime(value);
+                } else if (value === null || value === undefined) {
+                  value = '-';
+                }
+                return `<td>${value}</td>`;
+              }).join('')}
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+/**
+ * ========================================
+ * 客户管理模块
+ * ========================================
+ */
+
+let customersData = [];
+let customersPage = 1;
+const customersPerPage = 20;
+
+// 加载客户列表
+async function loadCustomers() {
+  const content = document.getElementById('content-area');
+  content.innerHTML = '<div class="loading">加载中...</div>';
+  
+  try {
+    const result = await bmobQuery(CLASS_NAMES.CUSTOMER, {
+      order: '-createdAt'
+    });
+    
+    customersData = bmobArrayToPlain(result.data);
+    
+    renderCustomersList();
+  } catch (err) {
+    console.error('加载客户列表失败:', err);
+    content.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">❌</div>
+        <p>加载失败，请刷新重试</p>
+      </div>
+    `;
+  }
+}
+
+// 渲染客户列表
+function renderCustomersList(searchTerm = '') {
+  const content = document.getElementById('content-area');
+  
+  // 筛选数据
+  let filteredData = customersData;
+  if (searchTerm) {
+    const term = searchTerm.toLowerCase();
+    filteredData = customersData.filter(c => 
+      c.name?.toLowerCase().includes(term) ||
+      c.contact?.toLowerCase().includes(term) ||
+      c.phone?.includes(term)
+    );
+  }
+  
+  // 分页
+  const startIndex = (customersPage - 1) * customersPerPage;
+  const paginatedData = filteredData.slice(startIndex, startIndex + customersPerPage);
+  
+  content.innerHTML = `
+    <div class="module-header">
+      <h2 class="module-title">👥 客户管理</h2>
+      <div class="module-actions">
+        <button class="btn-secondary" onclick="exportCustomersCSV()">📥 导出CSV</button>
+        <button class="btn-secondary" onclick="printContent()">🖨️ 打印</button>
+        ${currentRole === 'admin' ? `<button class="btn-primary" onclick="openCustomerModal()">➕ 新增客户</button>` : ''}
+      </div>
+    </div>
+    
+    <div class="search-bar">
+      <input type="text" class="search-input" placeholder="🔍 搜索客户名称、联系人或电话..." 
+             value="${searchTerm}" oninput="searchCustomers(this.value)">
+    </div>
+    
+    ${renderCustomersTable(paginatedData)}
+    
+    ${renderPagination(filteredData.length, customersPage, customersPerPage, 'customersPage')}
+  `;
+}
+
+// 渲染客户表格
+function renderCustomersTable(data) {
+  if (!data || data.length === 0) {
+    return `
+      <div class="empty-state">
+        <div class="icon">👥</div>
+        <p>暂无客户数据</p>
+      </div>
+    `;
+  }
+  
+  const headers = [
+    { title: '客户名称', key: 'name' },
+    { title: '联系人', key: 'contact' },
+    { title: '电话', key: 'phone' },
+    { title: '地址', key: 'address' },
+    { title: '备注', key: 'notes' },
+    { title: '创建时间', key: 'createdAt', type: 'datetime' }
+  ];
+  
+  const actions = currentRole === 'admin' ? [
+    { text: '编辑', class: 'btn-secondary', handler: 'openCustomerModal' },
+    { text: '删除', class: 'btn-danger', handler: 'deleteCustomer' }
+  ] : [];
+  
+  return renderTable(headers, data, actions);
+}
+
+// 搜索客户
+const searchCustomers = debounce((value) => {
+  customersPage = 1;
+  renderCustomersList(value);
+}, 300);
+
+// 打开客户模态框
+function openCustomerModal(data = null) {
+  const isEdit = !!data;
+  const title = isEdit ? '✏️ 编辑客户' : '➕ 新增客户';
+  
+  const fields = [
+    { name: 'id', type: 'hidden' },
+    { name: 'name', label: '客户名称 *', required: true, placeholder: '请输入客户名称' },
+    { name: 'contact', label: '联系人', placeholder: '请输入联系人姓名' },
+    { name: 'phone', label: '联系电话', placeholder: '请输入电话号码' },
+    { name: 'address', label: '地址', placeholder: '请输入详细地址' },
+    { name: 'notes', label: '备注', type: 'textarea', placeholder: '其他备注信息...' }
+  ];
+  
+  const formData = data ? {
+    id: data.id,
+    name: data.name,
+    contact: data.contact,
+    phone: data.phone,
+    address: data.address,
+    notes: data.notes
+  } : {};
+  
+  const formHTML = generateFormHTML(fields, formData);
+  
+  openModal(title, formHTML, () => saveCustomer(), false);
+  
+  // 自定义确定按钮
+  const modalFooter = document.getElementById('modal-footer');
+  modalFooter.innerHTML = `
+    <button class="btn-secondary" onclick="closeModal()">取消</button>
+    <button class="btn-primary" onclick="saveCustomer()">保存</button>
+  `;
+}
+
+// 保存客户
+async function saveCustomer() {
+  const fields = [
+    { name: 'id' },
+    { name: 'name', label: '客户名称', required: true },
+    { name: 'contact' },
+    { name: 'phone' },
+    { name: 'address' },
+    { name: 'notes' }
+  ];
+  
+  const data = getFormData(fields);
+  
+  // 验证
+  if (!data.name?.trim()) {
+    showToast('请输入客户名称', 'error');
+    return;
+  }
+  
+  try {
+    const customerData = {
+      name: data.name.trim(),
+      contact: data.contact?.trim() || null,
+      phone: data.phone?.trim() || null,
+      address: data.address?.trim() || null,
+      notes: data.notes?.trim() || null
+    };
+    
+    let result;
+    
+    if (data.id) {
+      // 更新
+      result = await bmobUpdate(CLASS_NAMES.CUSTOMER, data.id, customerData);
+    } else {
+      // 新增
+      customerData.createdBy = currentUserId;
+      result = await bmobCreate(CLASS_NAMES.CUSTOMER, customerData);
+    }
+    
+    closeModal();
+    showToast(data.id ? '客户更新成功' : '客户添加成功', 'success');
+    loadCustomers();
+  } catch (err) {
+    console.error('保存客户失败:', err);
+    showToast('保存失败：' + (err.message || err.error || '未知错误'), 'error');
+  }
+}
+
+// 删除客户
+function deleteCustomer(id) {
+  confirm('确定要删除该客户吗？相关订单数据将保留。', async () => {
+    try {
+      await bmobDelete(CLASS_NAMES.CUSTOMER, id);
+      
+      showToast('客户已删除', 'success');
+      loadCustomers();
+    } catch (err) {
+      console.error('删除客户失败:', err);
+      showToast('删除失败：' + (err.message || err.error || '未知错误'), 'error');
+    }
+  });
+}
+
+// 导出客户CSV
+function exportCustomersCSV() {
+  const headers = [
+    { key: 'name', title: '客户名称' },
+    { key: 'contact', title: '联系人' },
+    { key: 'phone', title: '电话' },
+    { key: 'address', title: '地址' },
+    { key: 'notes', title: '备注' },
+    { key: 'createdAt', title: '创建时间' }
+  ];
+  
+  exportToCSV(customersData, '客户列表', headers);
+}
+
+// 分页点击
+function customersPage(page) {
+  customersPage = page;
+  renderCustomersList(document.querySelector('.search-input')?.value || '');
+}
+
+/**
+ * ========================================
+ * 订单管理模块
+ * ========================================
+ */
+
+let ordersData = [];
+let ordersPage = 1;
+const ordersPerPage = 20;
+let customersOptions = [];
+
+// 加载订单列表
+async function loadOrders() {
+  const content = document.getElementById('content-area');
+  content.innerHTML = '<div class="loading">加载中...</div>';
+  
+  try {
+    // 获取客户选项
+    const customersResult = await bmobQuery(CLASS_NAMES.CUSTOMER, {
+      order: 'name'
+    });
+    customersOptions = bmobArrayToPlain(customersResult.data);
+    
+    // 获取订单列表
+    const result = await bmobQuery(CLASS_NAMES.ORDER, {
+      order: '-createdAt',
+      include: 'customer'
+    });
+    
+    // 处理关联数据
+    ordersData = result.data.map(order => {
+      const plain = bmobObjectToPlain(order);
+      const customer = order.get('customer');
+      if (customer) {
+        plain.customerId = customer.id;
+        // 尝试从关联对象获取名称，如果没有则从customersOptions匹配
+        const customerObj = customersOptions.find(c => c.id === customer.id);
+        plain.customerName = customerObj ? customerObj.name : (customer.name || '');
+      }
+      return plain;
+    });
+    
+    renderOrdersList();
+  } catch (err) {
+    console.error('加载订单列表失败:', err);
+    content.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">❌</div>
+        <p>加载失败，请刷新重试</p>
+      </div>
+    `;
+  }
+}
+
+// 渲染订单列表
+function renderOrdersList(searchTerm = '', statusFilter = '') {
+  const content = document.getElementById('content-area');
+  
+  // 筛选数据
+  let filteredData = ordersData;
+  if (searchTerm) {
+    const term = searchTerm.toLowerCase();
+    filteredData = filteredData.filter(o => 
+      o.orderNo?.toLowerCase().includes(term) ||
+      o.product?.toLowerCase().includes(term) ||
+      o.customerName?.toLowerCase().includes(term)
+    );
+  }
+  if (statusFilter) {
+    filteredData = filteredData.filter(o => o.status === statusFilter);
+  }
+  
+  // 分页
+  const startIndex = (ordersPage - 1) * ordersPerPage;
+  const paginatedData = filteredData.slice(startIndex, startIndex + ordersPerPage);
+  
+  const canManage = currentRole === 'admin';
+  
+  content.innerHTML = `
+    <div class="module-header">
+      <h2 class="module-title">📋 订单管理</h2>
+      <div class="module-actions">
+        <button class="btn-secondary" onclick="exportOrdersCSV()">📥 导出CSV</button>
+        <button class="btn-secondary" onclick="printContent()">🖨️ 打印</button>
+        ${canManage ? `<button class="btn-primary" onclick="openOrderModal()">➕ 新增订单</button>` : ''}
+      </div>
+    </div>
+    
+    <div class="search-bar">
+      <input type="text" class="search-input" placeholder="🔍 搜索订单号、产品或客户..." 
+             value="${searchTerm}" oninput="searchOrders(this.value)">
+      <select class="filter-select" onchange="filterOrdersByStatus(this.value)">
+        <option value="">全部状态</option>
+        <option value="pending" ${statusFilter === 'pending' ? 'selected' : ''}>待处理</option>
+        <option value="paid" ${statusFilter === 'paid' ? 'selected' : ''}>已付款</option>
+        <option value="shipped" ${statusFilter === 'shipped' ? 'selected' : ''}>已发货</option>
+        <option value="settled" ${statusFilter === 'settled' ? 'selected' : ''}>已结算</option>
+        <option value="cancelled" ${statusFilter === 'cancelled' ? 'selected' : ''}>已取消</option>
+      </select>
+    </div>
+    
+    ${renderOrdersTable(paginatedData)}
+    
+    ${renderPagination(filteredData.length, ordersPage, ordersPerPage, 'ordersPage')}
+  `;
+}
+
+// 渲染订单表格
+function renderOrdersTable(data) {
+  if (!data || data.length === 0) {
+    return `
+      <div class="empty-state">
+        <div class="icon">📋</div>
+        <p>暂无订单数据</p>
+      </div>
+    `;
+  }
+  
+  const headers = [
+    { title: '订单号', key: 'orderNo' },
+    { title: '客户', key: 'customerName' },
+    { title: '产品', key: 'product' },
+    { title: '数量', key: 'quantity' },
+    { title: '单价', key: 'price', type: 'currency' },
+    { title: '金额', key: 'amount', type: 'currency' },
+    { title: '状态', key: 'status', type: 'status', statusType: 'order' },
+    { title: '下单时间', key: 'orderTime', type: 'datetime' }
+  ];
+  
+  const canManage = currentRole === 'admin';
+  const actions = canManage ? [
+    { text: '编辑', class: 'btn-secondary', handler: 'openOrderModal' },
+    { text: '删除', class: 'btn-danger', handler: 'deleteOrder' }
+  ] : [];
+  
+  return renderTable(headers, data, actions);
+}
+
+// 搜索订单
+const searchOrders = debounce((value) => {
+  ordersPage = 1;
+  renderOrdersList(value, document.querySelector('.filter-select')?.value || '');
+}, 300);
+
+// 筛选订单状态
+function filterOrdersByStatus(status) {
+  ordersPage = 1;
+  renderOrdersList(document.querySelector('.search-input')?.value || '', status);
+}
+
+// 打开订单模态框
+async function openOrderModal(data = null) {
+  const isEdit = !!data;
+  const title = isEdit ? '✏️ 编辑订单' : '➕ 新增订单';
+  
+  // 生成新订单号
+  let orderNo = '';
+  if (!isEdit) {
+    const today = new Date();
+    const dateStr = today.getFullYear().toString() +
+      String(today.getMonth() + 1).padStart(2, '0') +
+      String(today.getDate()).padStart(2, '0');
+    const todayOrders = ordersData.filter(o => o.orderNo?.startsWith('ORD' + dateStr));
+    const seqNum = (todayOrders.length + 1).toString().padStart(3, '0');
+    orderNo = 'ORD' + dateStr + seqNum;
+  }
+  
+  const customerOptions = [
+    { value: '', label: '请选择客户' },
+    ...customersOptions.map(c => ({ value: c.id, label: c.name }))
+  ];
+  
+  const fields = [
+    { name: 'id', type: 'hidden' },
+    { name: 'orderNo', label: '订单号', type: 'readonly', default: orderNo },
+    { name: 'customerId', label: '客户 *', type: 'select', options: customerOptions, required: true },
+    { name: 'product', label: '产品 *', required: true, placeholder: '请输入产品名称' },
+    { name: 'quantity', label: '数量', type: 'number', default: '1' },
+    { name: 'price', label: '单价', type: 'number', default: '0' }
+  ];
+  
+  const formData = data ? {
+    id: data.id,
+    orderNo: data.orderNo,
+    customerId: data.customerId,
+    product: data.product,
+    quantity: data.quantity,
+    price: data.price
+  } : { orderNo: orderNo };
+  
+  const formHTML = generateFormHTML(fields, formData);
+  
+  openModal(title, formHTML, () => saveOrder(), false);
+  
+  // 自定义确定按钮
+  const modalFooter = document.getElementById('modal-footer');
+  modalFooter.innerHTML = `
+    <button class="btn-secondary" onclick="closeModal()">取消</button>
+    <button class="btn-primary" onclick="saveOrder()">保存</button>
+  `;
+}
+
+// 保存订单
+async function saveOrder() {
+  const fields = [
+    { name: 'id' },
+    { name: 'orderNo' },
+    { name: 'customerId', required: true },
+    { name: 'product', required: true },
+    { name: 'quantity' },
+    { name: 'price' }
+  ];
+  
+  const data = getFormData(fields);
+  
+  // 验证
+  if (!data.customerId) {
+    showToast('请选择客户', 'error');
+    return;
+  }
+  if (!data.product?.trim()) {
+    showToast('请输入产品名称', 'error');
+    return;
+  }
+  
+  try {
+    const quantity = parseFloat(data.quantity) || 1;
+    const price = parseFloat(data.price) || 0;
+    const amount = quantity * price;
+    
+    // 创建Bmob Pointer
+    const customerPointer = Bmob.Object.createWithoutData("Customer", data.customerId);
+    
+    const orderData = {
+      orderNo: data.orderNo,
+      customer: customerPointer,
+      product: data.product.trim(),
+      quantity: quantity,
+      price: price,
+      amount: amount
+    };
+    
+    if (data.id) {
+      // 更新
+      await bmobUpdate(CLASS_NAMES.ORDER, data.id, orderData);
+    } else {
+      // 新增
+      orderData.status = 'pending';
+      orderData.createdBy = currentUserId;
+      orderData.orderTime = new Date();
+      await bmobCreate(CLASS_NAMES.ORDER, orderData);
+    }
+    
+    closeModal();
+    showToast(data.id ? '订单更新成功' : '订单创建成功', 'success');
+    loadOrders();
+  } catch (err) {
+    console.error('保存订单失败:', err);
+    showToast('保存失败：' + (err.message || err.error || '未知错误'), 'error');
+  }
+}
+
+// 删除订单
+function deleteOrder(id) {
+  confirm('确定要删除该订单吗？', async () => {
+    try {
+      await bmobDelete(CLASS_NAMES.ORDER, id);
+      
+      showToast('订单已删除', 'success');
+      loadOrders();
+    } catch (err) {
+      console.error('删除订单失败:', err);
+      showToast('删除失败：' + (err.message || err.error || '未知错误'), 'error');
+    }
+  });
+}
+
+// 导出订单CSV
+function exportOrdersCSV() {
+  const headers = [
+    { key: 'orderNo', title: '订单号' },
+    { key: 'customerName', title: '客户' },
+    { key: 'product', title: '产品' },
+    { key: 'quantity', title: '数量' },
+    { key: 'price', title: '单价' },
+    { key: 'amount', title: '金额' },
+    { key: 'status', title: '状态' },
+    { key: 'orderTime', title: '下单时间' }
+  ];
+  
+  const exportData = ordersData.map(o => ({
+    ...o,
+    status: getStatusText(o.status, 'order')
+  }));
+  
+  exportToCSV(exportData, '订单列表', headers);
+}
+
+// 分页点击
+function ordersPage(page) {
+  ordersPage = page;
+  renderOrdersList(
+    document.querySelector('.search-input')?.value || '',
+    document.querySelector('.filter-select')?.value || ''
+  );
+}
+
+/**
+ * ========================================
+ * 转款确认模块
+ * ========================================
+ */
+
+let paymentsData = [];
+let paymentsPage = 1;
+const paymentsPerPage = 20;
+let ordersOptions = [];
+
+// 加载转款记录列表
+async function loadPayments() {
+  const content = document.getElementById('content-area');
+  content.innerHTML = '<div class="loading">加载中...</div>';
+  
+  try {
+    // 获取订单选项
+    const ordersResult = await bmobQuery(CLASS_NAMES.ORDER, {
+      order: '-createdAt',
+      include: 'customer'
+    });
+    
+    ordersOptions = ordersResult.data.map(order => {
+      const plain = bmobObjectToPlain(order);
+      const customer = order.get('customer');
+      if (customer) {
+        plain.customerId = customer.id;
+        plain.customerName = customer.name || '';
+      }
+      return plain;
+    });
+    
+    // 获取转款记录
+    const result = await bmobQuery(CLASS_NAMES.PAYMENT, {
+      order: '-createdAt',
+      include: 'order'
+    });
+    
+    // 处理关联数据
+    paymentsData = result.data.map(payment => {
+      const plain = bmobObjectToPlain(payment);
+      const order = payment.get('order');
+      if (order) {
+        plain.orderId = order.id;
+        plain.orderNo = order.get('orderNo') || '';
+        plain.orderAmount = order.get('amount') || 0;
+        const customer = order.get('customer');
+        if (customer) {
+          plain.customerName = customer.name || '';
+        }
+      }
+      return plain;
+    });
+    
+    renderPaymentsList();
+  } catch (err) {
+    console.error('加载转款记录失败:', err);
+    content.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">❌</div>
+        <p>加载失败，请刷新重试</p>
+      </div>
+    `;
+  }
+}
+
+// 渲染转款列表
+function renderPaymentsList(searchTerm = '', statusFilter = '') {
+  const content = document.getElementById('content-area');
+  
+  // 筛选数据
+  let filteredData = paymentsData;
+  if (searchTerm) {
+    const term = searchTerm.toLowerCase();
+    filteredData = paymentsData.filter(p => 
+      p.orderNo?.toLowerCase().includes(term) ||
+      p.customerName?.toLowerCase().includes(term)
+    );
+  }
+  if (statusFilter) {
+    filteredData = filteredData.filter(p => p.status === statusFilter);
+  }
+  
+  // 分页
+  const startIndex = (paymentsPage - 1) * paymentsPerPage;
+  const paginatedData = filteredData.slice(startIndex, startIndex + paymentsPerPage);
+  
+  const canReview = currentRole === 'admin' || currentRole === 'finance';
+  
+  content.innerHTML = `
+    <div class="module-header">
+      <h2 class="module-title">💳 转款确认</h2>
+      <div class="module-actions">
+        <button class="btn-secondary" onclick="exportPaymentsCSV()">📥 导出CSV</button>
+        <button class="btn-secondary" onclick="printContent()">🖨️ 打印</button>
+        ${canReview ? `<button class="btn-primary" onclick="openPaymentModal()">➕ 新增转款</button>` : ''}
+      </div>
+    </div>
+    
+    <div class="search-bar">
+      <input type="text" class="search-input" placeholder="🔍 搜索订单号或客户..." 
+             value="${searchTerm}" oninput="searchPayments(this.value)">
+      <select class="filter-select" onchange="filterPaymentsByStatus(this.value)">
+        <option value="">全部状态</option>
+        <option value="pending" ${statusFilter === 'pending' ? 'selected' : ''}>待审核</option>
+        <option value="confirmed" ${statusFilter === 'confirmed' ? 'selected' : ''}>已确认</option>
+        <option value="rejected" ${statusFilter === 'rejected' ? 'selected' : ''}>已拒绝</option>
+      </select>
+    </div>
+    
+    ${renderPaymentsTable(paginatedData, canReview)}
+    
+    ${renderPagination(filteredData.length, paymentsPage, paymentsPerPage, 'paymentsPage')}
+  `;
+}
+
+// 渲染转款表格
+function renderPaymentsTable(data, canReview) {
+  if (!data || data.length === 0) {
+    return `
+      <div class="empty-state">
+        <div class="icon">💳</div>
+        <p>暂无转款记录</p>
+      </div>
+    `;
+  }
+  
+  const headers = [
+    { title: '订单号', key: 'orderNo' },
+    { title: '客户', key: 'customerName' },
+    { title: '订单金额', key: 'orderAmount', render: (val) => formatCurrency(val) },
+    { title: '转款金额', key: 'amount', type: 'currency' },
+    { title: '凭证', key: 'voucherUrl', render: (url) => url ? `<a href="${url}" target="_blank">查看</a>` : '-' },
+    { title: '状态', key: 'status', type: 'status', statusType: 'payment' },
+    { title: '提交时间', key: 'createdAt', type: 'datetime' }
+  ];
+  
+  const actions = canReview ? [
+    { text: '确认', class: 'btn-success', handler: 'confirmPayment', condition: (row) => row.status === 'pending' },
+    { text: '拒绝', class: 'btn-danger', handler: 'rejectPayment', condition: (row) => row.status === 'pending' },
+    { text: '编辑', class: 'btn-secondary', handler: 'openPaymentModal' }
+  ] : [];
+  
+  return renderTable(headers, data, actions);
+}
+
+// 搜索转款记录
+const searchPayments = debounce((value) => {
+  paymentsPage = 1;
+  renderPaymentsList(value, document.querySelector('.filter-select')?.value || '');
+}, 300);
+
+// 筛选转款状态
+function filterPaymentsByStatus(status) {
+  paymentsPage = 1;
+  renderPaymentsList(document.querySelector('.search-input')?.value || '', status);
+}
+
+// 打开转款模态框
+async function openPaymentModal(data = null) {
+  const isEdit = !!data;
+  const title = isEdit ? '✏️ 编辑转款记录' : '➕ 新增转款记录';
+  
+  const orderOptions = [
+    { value: '', label: '请选择订单' },
+    ...ordersOptions.map(o => ({ 
+      value: o.id, 
+      label: `${o.orderNo} (¥${parseFloat(o.amount).toFixed(2)})` 
+    }))
+  ];
+  
+  const statusOptions = [
+    { value: 'pending', label: '待审核' },
+    { value: 'confirmed', label: '已确认' },
+    { value: 'rejected', label: '已拒绝' }
+  ];
+  
+  const fields = [
+    { name: 'id', type: 'hidden' },
+    { name: 'orderId', label: '订单 *', type: 'select', options: orderOptions, required: true },
+    { name: 'amount', label: '转款金额 *', type: 'number', required: true, placeholder: '0.00' },
+    { name: 'voucher', label: '转账凭证', type: 'file' },
+    { name: 'status', label: '状态', type: 'select', options: statusOptions, default: 'pending' }
+  ];
+  
+  let formData = data ? {
+    id: data.id,
+    orderId: data.orderId,
+    amount: data.amount,
+    status: data.status,
+    voucher: data.voucherUrl
+  } : {};
+  
+  const formHTML = generateFormHTML(fields, formData);
+  
+  openModal(title, formHTML, () => savePayment(), false);
+  
+  // 自定义确定按钮
+  const modalFooter = document.getElementById('modal-footer');
+  modalFooter.innerHTML = `
+    <button class="btn-secondary" onclick="closeModal()">取消</button>
+    <button class="btn-primary" onclick="savePayment()">保存</button>
+  `;
+  
+  // 如果有凭证图片，显示预览
+  if (data?.voucherUrl) {
+    const preview = document.getElementById('preview-voucher');
+    const previewImg = document.getElementById('preview-img-voucher');
+    if (preview && previewImg) {
+      previewImg.src = data.voucherUrl;
+      preview.classList.remove('hidden');
+    }
+  }
+}
+
+// 保存转款记录
+async function savePayment() {
+  const fields = [
+    { name: 'id' },
+    { name: 'orderId', required: true },
+    { name: 'amount', required: true },
+    { name: 'status' }
+  ];
+  
+  const data = getFormData(fields);
+  
+  // 验证
+  if (!data.orderId) {
+    showToast('请选择订单', 'error');
+    return;
+  }
+  const amount = parseFloat(data.amount);
+  if (!amount || amount <= 0) {
+    showToast('请输入正确的转款金额', 'error');
+    return;
+  }
+  
+  try {
+    // 处理文件上传
+    let voucherUrl = null;
+    const fileInput = document.getElementById('field-voucher');
+    if (fileInput?.files?.[0]) {
+      const uploadResult = await bmobUploadFile(fileInput.files[0]);
+      voucherUrl = uploadResult.data;
+    }
+    
+    // 创建Bmob Pointer
+    const orderPointer = Bmob.Object.createWithoutData("Order", data.orderId);
+    
+    const paymentData = {
+      order: orderPointer,
+      amount: amount,
+      status: data.status || 'pending'
+    };
+    
+    if (voucherUrl) {
+      paymentData.voucherUrl = voucherUrl;
+    }
+    
+    if (data.id) {
+      // 更新
+      await bmobUpdate(CLASS_NAMES.PAYMENT, data.id, paymentData);
+    } else {
+      // 新增
+      paymentData.createdBy = currentUserId;
+      await bmobCreate(CLASS_NAMES.PAYMENT, paymentData);
+    }
+    
+    // 如果状态是 confirmed，同时更新订单状态
+    if (paymentData.status === 'confirmed') {
+      await bmobUpdate(CLASS_NAMES.ORDER, data.orderId, { status: 'paid' });
+    }
+    
+    closeModal();
+    showToast(data.id ? '转款记录已更新' : '转款记录已提交', 'success');
+    loadPayments();
+  } catch (err) {
+    console.error('保存转款记录失败:', err);
+    showToast('保存失败：' + (err.message || err.error || '未知错误'), 'error');
+  }
+}
+
+// 确认转款
+async function confirmPayment(payment) {
+  confirm('确认该转款记录吗？', async () => {
+    try {
+      // 更新转款状态
+      await bmobUpdate(CLASS_NAMES.PAYMENT, payment.id, {
+        status: 'confirmed',
+        reviewedBy: currentUserId,
+        reviewedAt: new Date()
+      });
+      
+      // 更新关联订单状态
+      await bmobUpdate(CLASS_NAMES.ORDER, payment.orderId, { status: 'paid' });
+      
+      showToast('转款已确认', 'success');
+      loadPayments();
+    } catch (err) {
+      console.error('确认转款失败:', err);
+      showToast('操作失败：' + (err.message || err.error || '未知错误'), 'error');
+    }
+  });
+}
+
+// 拒绝转款
+async function rejectPayment(payment) {
+  confirm('拒绝该转款记录吗？', async () => {
+    try {
+      await bmobUpdate(CLASS_NAMES.PAYMENT, payment.id, {
+        status: 'rejected',
+        reviewedBy: currentUserId,
+        reviewedAt: new Date()
+      });
+      
+      showToast('转款已拒绝', 'success');
+      loadPayments();
+    } catch (err) {
+      console.error('拒绝转款失败:', err);
+      showToast('操作失败：' + (err.message || err.error || '未知错误'), 'error');
+    }
+  });
+}
+
+// 导出转款CSV
+function exportPaymentsCSV() {
+  const headers = [
+    { key: 'orderNo', title: '订单号' },
+    { key: 'customerName', title: '客户' },
+    { key: 'orderAmount', title: '订单金额' },
+    { key: 'amount', title: '转款金额' },
+    { key: 'status', title: '状态' },
+    { key: 'createdAt', title: '提交时间' },
+    { key: 'reviewedAt', title: '审核时间' }
+  ];
+  
+  const exportData = paymentsData.map(p => ({
+    orderNo: p.orderNo || '',
+    customerName: p.customerName || '',
+    orderAmount: p.orderAmount || 0,
+    amount: p.amount,
+    status: getStatusText(p.status, 'payment'),
+    createdAt: p.createdAt,
+    reviewedAt: p.reviewedAt || ''
+  }));
+  
+  exportToCSV(exportData, '转款记录', headers);
+}
+
+// 分页点击
+function paymentsPage(page) {
+  paymentsPage = page;
+  renderPaymentsList(
+    document.querySelector('.search-input')?.value || '',
+    document.querySelector('.filter-select')?.value || ''
+  );
+}
+
+/**
+ * ========================================
+ * 物流派车模块
+ * ========================================
+ */
+
+let logisticsData = [];
+let logisticsPage = 1;
+const logisticsPerPage = 20;
+let logisticsOrdersOptions = [];
+
+// 加载物流列表
+async function loadLogistics() {
+  const content = document.getElementById('content-area');
+  content.innerHTML = '<div class="loading">加载中...</div>';
+  
+  try {
+    // 获取订单选项
+    const ordersResult = await bmobQuery(CLASS_NAMES.ORDER, {
+      order: '-createdAt',
+      include: 'customer'
+    });
+    
+    logisticsOrdersOptions = ordersResult.data.map(order => {
+      const plain = bmobObjectToPlain(order);
+      const customer = order.get('customer');
+      if (customer) {
+        plain.customerId = customer.id;
+        plain.customerName = customer.name || '';
+      }
+      return plain;
+    });
+    
+    // 获取物流记录
+    const result = await bmobQuery(CLASS_NAMES.LOGISTICS, {
+      order: '-createdAt',
+      include: 'order'
+    });
+    
+    // 处理关联数据
+    logisticsData = result.data.map(logistics => {
+      const plain = bmobObjectToPlain(logistics);
+      const order = logistics.get('order');
+      if (order) {
+        plain.orderId = order.id;
+        plain.orderNo = order.get('orderNo') || '';
+        const customer = order.get('customer');
+        if (customer) {
+          plain.customerName = customer.name || '';
+        }
+      }
+      return plain;
+    });
+    
+    renderLogisticsList();
+  } catch (err) {
+    console.error('加载物流列表失败:', err);
+    content.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">❌</div>
+        <p>加载失败，请刷新重试</p>
+      </div>
+    `;
+  }
+}
+
+// 渲染物流列表
+function renderLogisticsList(searchTerm = '', statusFilter = '') {
+  const content = document.getElementById('content-area');
+  
+  // 筛选数据
+  let filteredData = logisticsData;
+  if (searchTerm) {
+    const term = searchTerm.toLowerCase();
+    filteredData = logisticsData.filter(l => 
+      l.orderNo?.toLowerCase().includes(term) ||
+      l.driverName?.toLowerCase().includes(term) ||
+      l.plateNumber?.toLowerCase().includes(term) ||
+      l.customerName?.toLowerCase().includes(term)
+    );
+  }
+  if (statusFilter) {
+    filteredData = filteredData.filter(l => l.status === statusFilter);
+  }
+  
+  // 分页
+  const startIndex = (logisticsPage - 1) * logisticsPerPage;
+  const paginatedData = filteredData.slice(startIndex, startIndex + logisticsPerPage);
+  
+  const canManage = currentRole === 'admin' || currentRole === 'logistics';
+  
+  content.innerHTML = `
+    <div class="module-header">
+      <h2 class="module-title">🚚 物流派车</h2>
+      <div class="module-actions">
+        <button class="btn-secondary" onclick="exportLogisticsCSV()">📥 导出CSV</button>
+        <button class="btn-secondary" onclick="printContent()">🖨️ 打印</button>
+        ${canManage ? `<button class="btn-primary" onclick="openLogisticsModal()">➕ 新增派车</button>` : ''}
+      </div>
+    </div>
+    
+    <div class="search-bar">
+      <input type="text" class="search-input" placeholder="🔍 搜索订单号、司机或车牌..." 
+             value="${searchTerm}" oninput="searchLogistics(this.value)">
+      <select class="filter-select" onchange="filterLogisticsByStatus(this.value)">
+        <option value="">全部状态</option>
+        <option value="pending" ${statusFilter === 'pending' ? 'selected' : ''}>待派车</option>
+        <option value="in_transit" ${statusFilter === 'in_transit' ? 'selected' : ''}>运输中</option>
+        <option value="delivered" ${statusFilter === 'delivered' ? 'selected' : ''}>已送达</option>
+      </select>
+    </div>
+    
+    ${renderLogisticsTable(paginatedData, canManage)}
+    
+    ${renderPagination(filteredData.length, logisticsPage, logisticsPerPage, 'logisticsPage')}
+  `;
+}
+
+// 渲染物流表格
+function renderLogisticsTable(data, canManage) {
+  if (!data || data.length === 0) {
+    return `
+      <div class="empty-state">
+        <div class="icon">🚚</div>
+        <p>暂无物流记录</p>
+      </div>
+    `;
+  }
+  
+  const headers = [
+    { title: '订单号', key: 'orderNo' },
+    { title: '客户', key: 'customerName' },
+    { title: '司机', key: 'driverName' },
+    { title: '车牌', key: 'plateNumber' },
+    { title: '出发地', key: 'fromAddress' },
+    { title: '目的地', key: 'toAddress' },
+    { title: '发车时间', key: 'dispatchTime', type: 'datetime' },
+    { title: '状态', key: 'status', type: 'status', statusType: 'logistics' }
+  ];
+  
+  const actions = canManage ? [
+    { text: '发车', class: 'btn-success', handler: 'updateLogisticsStatus', condition: (row) => row.status === 'pending' },
+    { text: '送达', class: 'btn-primary', handler: 'updateLogisticsStatus', condition: (row) => row.status === 'in_transit' },
+    { text: '编辑', class: 'btn-secondary', handler: 'openLogisticsModal' }
+  ] : [];
+  
+  return renderTable(headers, data, actions);
+}
+
+// 搜索物流记录
+const searchLogistics = debounce((value) => {
+  logisticsPage = 1;
+  renderLogisticsList(value, document.querySelector('.filter-select')?.value || '');
+}, 300);
+
+// 筛选物流状态
+function filterLogisticsByStatus(status) {
+  logisticsPage = 1;
+  renderLogisticsList(document.querySelector('.search-input')?.value || '', status);
+}
+
+// 打开物流模态框
+async function openLogisticsModal(data = null) {
+  const isEdit = !!data;
+  const title = isEdit ? '✏️ 编辑派车记录' : '➕ 新增派车记录';
+  
+  const orderOptions = [
+    { value: '', label: '请选择订单' },
+    ...logisticsOrdersOptions.map(o => ({ 
+      value: o.id, 
+      label: `${o.orderNo} - ${o.customerName || ''}` 
+    }))
+  ];
+  
+  const statusOptions = [
+    { value: 'pending', label: '待派车' },
+    { value: 'in_transit', label: '运输中' },
+    { value: 'delivered', label: '已送达' }
+  ];
+  
+  const fields = [
+    { name: 'id', type: 'hidden' },
+    { name: 'orderId', label: '订单 *', type: 'select', options: orderOptions, required: true },
+    { name: 'driverName', label: '司机姓名 *', required: true, placeholder: '请输入司机姓名' },
+    { name: 'plateNumber', label: '车牌号', placeholder: '请输入车牌号' },
+    { name: 'fromAddress', label: '出发地', placeholder: '请输入出发地址' },
+    { name: 'toAddress', label: '目的地', placeholder: '请输入目的地址' },
+    { name: 'dispatchTime', label: '发车时间', type: 'datetime-local' },
+    { name: 'status', label: '状态', type: 'select', options: statusOptions, default: 'pending' }
+  ];
+  
+  // 格式化日期时间
+  let formData = { ...data };
+  if (data?.dispatchTime) {
+    const d = new Date(data.dispatchTime);
+    formData.dispatchTime = d.toISOString().slice(0, 16);
+  }
+  
+  const formHTML = generateFormHTML(fields, formData);
+  
+  openModal(title, formHTML, () => saveLogistics(), false);
+  
+  // 自定义确定按钮
+  const modalFooter = document.getElementById('modal-footer');
+  modalFooter.innerHTML = `
+    <button class="btn-secondary" onclick="closeModal()">取消</button>
+    <button class="btn-primary" onclick="saveLogistics()">保存</button>
+  `;
+}
+
+// 保存物流记录
+async function saveLogistics() {
+  const fields = [
+    { name: 'id' },
+    { name: 'orderId', required: true },
+    { name: 'driverName', required: true },
+    { name: 'plateNumber' },
+    { name: 'fromAddress' },
+    { name: 'toAddress' },
+    { name: 'dispatchTime' },
+    { name: 'status' }
+  ];
+  
+  const data = getFormData(fields);
+  
+  // 验证
+  if (!data.orderId) {
+    showToast('请选择订单', 'error');
+    return;
+  }
+  if (!data.driverName?.trim()) {
+    showToast('请输入司机姓名', 'error');
+    return;
+  }
+  
+  try {
+    // 创建Bmob Pointer
+    const orderPointer = Bmob.Object.createWithoutData("Order", data.orderId);
+    
+    const logisticsRecordData = {
+      order: orderPointer,
+      driverName: data.driverName.trim(),
+      plateNumber: data.plateNumber?.trim() || null,
+      fromAddress: data.fromAddress?.trim() || null,
+      toAddress: data.toAddress?.trim() || null,
+      status: data.status || 'pending'
+    };
+    
+    if (data.dispatchTime) {
+      logisticsRecordData.dispatchTime = new Date(data.dispatchTime);
+    }
+    
+    if (data.id) {
+      // 更新
+      await bmobUpdate(CLASS_NAMES.LOGISTICS, data.id, logisticsRecordData);
+    } else {
+      // 新增
+      logisticsRecordData.createdBy = currentUserId;
+      await bmobCreate(CLASS_NAMES.LOGISTICS, logisticsRecordData);
+    }
+    
+    // 如果状态变更，同时更新订单状态
+    if (logisticsRecordData.status === 'in_transit') {
+      await bmobUpdate(CLASS_NAMES.ORDER, data.orderId, { status: 'shipped' });
+    }
+    
+    closeModal();
+    showToast(data.id ? '派车记录已更新' : '派车记录已创建', 'success');
+    loadLogistics();
+  } catch (err) {
+    console.error('保存物流记录失败:', err);
+    showToast('保存失败：' + (err.message || err.error || '未知错误'), 'error');
+  }
+}
+
+// 更新物流状态
+async function updateLogisticsStatus(logistics) {
+  let newStatus, confirmMsg;
+  
+  if (logistics.status === 'pending') {
+    newStatus = 'in_transit';
+    confirmMsg = '确认发车吗？';
+  } else if (logistics.status === 'in_transit') {
+    newStatus = 'delivered';
+    confirmMsg = '确认货物已送达吗？';
+  } else {
+    return;
+  }
+  
+  confirm(confirmMsg, async () => {
+    try {
+      await bmobUpdate(CLASS_NAMES.LOGISTICS, logistics.id, {
+        status: newStatus
+      });
+      
+      // 如果是送达，同时更新订单状态
+      if (newStatus === 'delivered') {
+        await bmobUpdate(CLASS_NAMES.ORDER, logistics.orderId, { status: 'settled' });
+      }
+      
+      showToast('状态已更新', 'success');
+      loadLogistics();
+    } catch (err) {
+      console.error('更新物流状态失败:', err);
+      showToast('操作失败：' + (err.message || err.error || '未知错误'), 'error');
+    }
+  });
+}
+
+// 导出物流CSV
+function exportLogisticsCSV() {
+  const headers = [
+    { key: 'orderNo', title: '订单号' },
+    { key: 'customerName', title: '客户' },
+    { key: 'driverName', title: '司机' },
+    { key: 'plateNumber', title: '车牌' },
+    { key: 'fromAddress', title: '出发地' },
+    { key: 'toAddress', title: '目的地' },
+    { key: 'dispatchTime', title: '发车时间' },
+    { key: 'status', title: '状态' },
+    { key: 'createdAt', title: '创建时间' }
+  ];
+  
+  const exportData = logisticsData.map(l => ({
+    orderNo: l.orderNo || '',
+    customerName: l.customerName || '',
+    driverName: l.driverName,
+    plateNumber: l.plateNumber || '',
+    fromAddress: l.fromAddress || '',
+    toAddress: l.toAddress || '',
+    dispatchTime: l.dispatchTime,
+    status: getStatusText(l.status, 'logistics'),
+    createdAt: l.createdAt
+  }));
+  
+  exportToCSV(exportData, '物流记录', headers);
+}
+
+// 分页点击
+function logisticsPage(page) {
+  logisticsPage = page;
+  renderLogisticsList(
+    document.querySelector('.search-input')?.value || '',
+    document.querySelector('.filter-select')?.value || ''
+  );
+}
+
+/**
+ * ========================================
+ * 财务结算模块
+ * ========================================
+ */
+
+let financeData = [];
+let financePage = 1;
+const financePerPage = 20;
+let financeOrdersOptions = [];
+
+// 加载财务列表
+async function loadFinance() {
+  const content = document.getElementById('content-area');
+  content.innerHTML = '<div class="loading">加载中...</div>';
+  
+  try {
+    // 获取订单选项
+    const ordersResult = await bmobQuery(CLASS_NAMES.ORDER, {
+      order: '-createdAt',
+      include: 'customer'
+    });
+    
+    financeOrdersOptions = ordersResult.data.map(order => {
+      const plain = bmobObjectToPlain(order);
+      const customer = order.get('customer');
+      if (customer) {
+        plain.customerId = customer.id;
+        plain.customerName = customer.name || '';
+      }
+      return plain;
+    });
+    
+    // 获取财务记录
+    const result = await bmobQuery(CLASS_NAMES.FINANCE, {
+      order: '-createdAt',
+      include: 'order'
+    });
+    
+    // 处理关联数据
+    financeData = result.data.map(finance => {
+      const plain = bmobObjectToPlain(finance);
+      const order = finance.get('order');
+      if (order) {
+        plain.orderId = order.id;
+        plain.orderNo = order.get('orderNo') || '';
+        plain.orderAmount = order.get('amount') || 0;
+        const customer = order.get('customer');
+        if (customer) {
+          plain.customerName = customer.name || '';
+        }
+      }
+      return plain;
+    });
+    
+    renderFinanceList();
+  } catch (err) {
+    console.error('加载财务列表失败:', err);
+    content.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">❌</div>
+        <p>加载失败，请刷新重试</p>
+      </div>
+    `;
+  }
+}
+
+// 渲染财务列表
+function renderFinanceList(searchTerm = '', statusFilter = '') {
+  const content = document.getElementById('content-area');
+  
+  // 筛选数据
+  let filteredData = financeData;
+  if (searchTerm) {
+    const term = searchTerm.toLowerCase();
+    filteredData = financeData.filter(f => 
+      f.orderNo?.toLowerCase().includes(term) ||
+      f.customerName?.toLowerCase().includes(term)
+    );
+  }
+  if (statusFilter) {
+    filteredData = filteredData.filter(f => f.settlementStatus === statusFilter);
+  }
+  
+  // 分页
+  const startIndex = (financePage - 1) * financePerPage;
+  const paginatedData = filteredData.slice(startIndex, startIndex + financePerPage);
+  
+  const canManage = currentRole === 'admin' || currentRole === 'finance';
+  
+  content.innerHTML = `
+    <div class="module-header">
+      <h2 class="module-title">💰 财务结算</h2>
+      <div class="module-actions">
+        <button class="btn-secondary" onclick="exportFinanceCSV()">📥 导出CSV</button>
+        <button class="btn-secondary" onclick="printContent()">🖨️ 打印</button>
+        ${canManage ? `<button class="btn-primary" onclick="openFinanceModal()">➕ 新增结算</button>` : ''}
+      </div>
+    </div>
+    
+    <div class="search-bar">
+      <input type="text" class="search-input" placeholder="🔍 搜索订单号或客户..." 
+             value="${searchTerm}" oninput="searchFinance(this.value)">
+      <select class="filter-select" onchange="filterFinanceByStatus(this.value)">
+        <option value="">全部状态</option>
+        <option value="unsettled" ${statusFilter === 'unsettled' ? 'selected' : ''}>未结算</option>
+        <option value="partial" ${statusFilter === 'partial' ? 'selected' : ''}>部分结算</option>
+        <option value="settled" ${statusFilter === 'settled' ? 'selected' : ''}>已结算</option>
+      </select>
+    </div>
+    
+    ${renderFinanceTable(paginatedData, canManage)}
+    
+    ${renderPagination(filteredData.length, financePage, financePerPage, 'financePage')}
+  `;
+}
+
+// 渲染财务表格
+function renderFinanceTable(data, canManage) {
+  if (!data || data.length === 0) {
+    return `
+      <div class="empty-state">
+        <div class="icon">💰</div>
+        <p>暂无财务记录</p>
+      </div>
+    `;
+  }
+  
+  const headers = [
+    { title: '订单号', key: 'orderNo' },
+    { title: '客户', key: 'customerName' },
+    { title: '订单金额', key: 'orderAmount', render: (val) => formatCurrency(val) },
+    { title: '已付金额', key: 'paidAmount', type: 'currency' },
+    { title: '未付金额', key: 'unpaidAmount', type: 'currency' },
+    { title: '结算状态', key: 'settlementStatus', type: 'status', statusType: 'finance' },
+    { title: '开票状态', key: 'invoiceStatus', type: 'status', statusType: 'invoice' },
+    { title: '备注', key: 'notes' }
+  ];
+  
+  const actions = canManage ? [
+    { text: '编辑', class: 'btn-secondary', handler: 'openFinanceModal' }
+  ] : [];
+  
+  return renderTable(headers, data, actions);
+}
+
+// 搜索财务记录
+const searchFinance = debounce((value) => {
+  financePage = 1;
+  renderFinanceList(value, document.querySelector('.filter-select')?.value || '');
+}, 300);
+
+// 筛选财务状态
+function filterFinanceByStatus(status) {
+  financePage = 1;
+  renderFinanceList(document.querySelector('.search-input')?.value || '', status);
+}
+
+// 打开财务模态框
+async function openFinanceModal(data = null) {
+  const isEdit = !!data;
+  const title = isEdit ? '✏️ 编辑结算记录' : '➕ 新增结算记录';
+  
+  const orderOptions = [
+    { value: '', label: '请选择订单' },
+    ...financeOrdersOptions.map(o => ({ 
+      value: o.id, 
+      label: `${o.orderNo} (¥${parseFloat(o.amount).toFixed(2)})` 
+    }))
+  ];
+  
+  const settlementOptions = [
+    { value: 'unsettled', label: '未结算' },
+    { value: 'partial', label: '部分结算' },
+    { value: 'settled', label: '已结算' }
+  ];
+  
+  const invoiceOptions = [
+    { value: 'none', label: '未开票' },
+    { value: 'invoiced', label: '已开票' }
+  ];
+  
+  // 获取已确认的付款金额
+  let paidAmount = 0;
+  if (data?.orderId) {
+    try {
+      const paymentsResult = await bmobQuery(CLASS_NAMES.PAYMENT, {
+        equalTo: { orderId: data.orderId, status: 'confirmed' }
+      });
+      paidAmount = paymentsResult.data.reduce((sum, p) => sum + (p.get('amount') || 0), 0);
+    } catch (e) {}
+  }
+  
+  const fields = [
+    { name: 'id', type: 'hidden' },
+    { name: 'orderId', label: '订单 *', type: 'select', options: orderOptions, required: true },
+    { name: 'totalAmount', label: '结算总额 *', type: 'number', required: true, placeholder: '0.00' },
+    { name: 'paidAmountDisplay', label: '已确认收款', type: 'readonly', default: paidAmount.toFixed(2) },
+    { name: 'unpaidAmountDisplay', label: '待收款', type: 'readonly', default: '0.00' },
+    { name: 'settlementStatus', label: '结算状态', type: 'select', options: settlementOptions, default: 'unsettled' },
+    { name: 'invoiceStatus', label: '开票状态', type: 'select', options: invoiceOptions, default: 'none' },
+    { name: 'notes', label: '备注', type: 'textarea', placeholder: '其他备注信息...' }
+  ];
+  
+  let formData = { ...data };
+  if (!data) {
+    formData.paidAmountDisplay = '0.00';
+    formData.unpaidAmountDisplay = '0.00';
+  }
+  
+  const formHTML = generateFormHTML(fields, formData);
+  
+  openModal(title, formHTML, () => saveFinance(), false);
+  
+  // 自定义确定按钮
+  const modalFooter = document.getElementById('modal-footer');
+  modalFooter.innerHTML = `
+    <button class="btn-secondary" onclick="closeModal()">取消</button>
+    <button class="btn-primary" onclick="saveFinance()">保存</button>
+  `;
+  
+  // 自动计算未付金额
+  const orderSelect = document.getElementById('field-orderId');
+  const totalInput = document.getElementById('field-totalAmount');
+  
+  // 选择订单时，自动填充金额并计算已付
+  orderSelect?.addEventListener('change', async () => {
+    const orderId = orderSelect.value;
+    if (!orderId) return;
+    
+    const order = financeOrdersOptions.find(o => o.id === orderId);
+    if (order) {
+      totalInput.value = order.amount;
+      
+      // 获取该订单已确认的付款
+      try {
+        const paymentsResult = await bmobQuery(CLASS_NAMES.PAYMENT, {
+          equalTo: { orderId: orderId, status: 'confirmed' }
+        });
+        const paid = paymentsResult.data.reduce((sum, p) => sum + (p.get('amount') || 0), 0);
+        document.getElementById('field-paidAmountDisplay').value = paid.toFixed(2);
+        
+        const total = parseFloat(order.amount) || 0;
+        const unpaid = total - paid;
+        document.getElementById('field-unpaidAmountDisplay').value = unpaid.toFixed(2);
+      } catch (e) {}
+    }
+  });
+  
+  // 总金额变化时，重新计算未付
+  totalInput?.addEventListener('input', () => {
+    const total = parseFloat(totalInput.value) || 0;
+    const paid = parseFloat(document.getElementById('field-paidAmountDisplay')?.value) || 0;
+    const unpaid = total - paid;
+    const unpaidDisplay = document.getElementById('field-unpaidAmountDisplay');
+    if (unpaidDisplay) {
+      unpaidDisplay.value = unpaid.toFixed(2);
+    }
+  });
+}
+
+// 保存财务记录
+async function saveFinance() {
+  const fields = [
+    { name: 'id' },
+    { name: 'orderId', required: true },
+    { name: 'totalAmount', required: true },
+    { name: 'settlementStatus' },
+    { name: 'invoiceStatus' },
+    { name: 'notes' }
+  ];
+  
+  const data = getFormData(fields);
+  
+  // 验证
+  if (!data.orderId) {
+    showToast('请选择订单', 'error');
+    return;
+  }
+  const totalAmount = parseFloat(data.totalAmount);
+  if (!totalAmount || totalAmount < 0) {
+    showToast('请输入正确的结算总额', 'error');
+    return;
+  }
+  
+  try {
+    // 计算已付金额（从已确认的付款记录汇总）
+    let paidAmount = 0;
+    try {
+      const paymentsResult = await bmobQuery(CLASS_NAMES.PAYMENT, {
+        equalTo: { orderId: data.orderId, status: 'confirmed' }
+      });
+      paidAmount = paymentsResult.data.reduce((sum, p) => sum + (p.get('amount') || 0), 0);
+    } catch (e) {}
+    
+    const unpaidAmount = totalAmount - paidAmount;
+    
+    // 创建Bmob Pointer
+    const orderPointer = Bmob.Object.createWithoutData("Order", data.orderId);
+    
+    const financeRecordData = {
+      order: orderPointer,
+      totalAmount: totalAmount,
+      paidAmount: paidAmount,
+      unpaidAmount: unpaidAmount,
+      settlementStatus: data.settlementStatus || 'unsettled',
+      invoiceStatus: data.invoiceStatus || 'none',
+      notes: data.notes?.trim() || null
+    };
+    
+    if (data.id) {
+      // 更新
+      await bmobUpdate(CLASS_NAMES.FINANCE, data.id, financeRecordData);
+    } else {
+      // 新增
+      financeRecordData.createdBy = currentUserId;
+      await bmobCreate(CLASS_NAMES.FINANCE, financeRecordData);
+    }
+    
+    closeModal();
+    showToast(data.id ? '结算记录已更新' : '结算记录已创建', 'success');
+    loadFinance();
+  } catch (err) {
+    console.error('保存结算记录失败:', err);
+    showToast('保存失败：' + (err.message || err.error || '未知错误'), 'error');
+  }
+}
+
+// 导出财务CSV
+function exportFinanceCSV() {
+  const headers = [
+    { key: 'orderNo', title: '订单号' },
+    { key: 'customerName', title: '客户' },
+    { key: 'orderAmount', title: '订单金额' },
+    { key: 'totalAmount', title: '结算总额' },
+    { key: 'paidAmount', title: '已付金额' },
+    { key: 'unpaidAmount', title: '未付金额' },
+    { key: 'settlementStatus', title: '结算状态' },
+    { key: 'invoiceStatus', title: '开票状态' },
+    { key: 'notes', title: '备注' },
+    { key: 'createdAt', title: '创建时间' }
+  ];
+  
+  const exportData = financeData.map(f => ({
+    orderNo: f.orderNo || '',
+    customerName: f.customerName || '',
+    orderAmount: f.orderAmount || 0,
+    totalAmount: f.totalAmount,
+    paidAmount: f.paidAmount,
+    unpaidAmount: f.unpaidAmount,
+    settlementStatus: getStatusText(f.settlementStatus, 'finance'),
+    invoiceStatus: getStatusText(f.invoiceStatus, 'invoice'),
+    notes: f.notes || '',
+    createdAt: f.createdAt
+  }));
+  
+  exportToCSV(exportData, '财务结算', headers);
+}
+
+// 分页点击
+function financePage(page) {
+  financePage = page;
+  renderFinanceList(
+    document.querySelector('.search-input')?.value || '',
+    document.querySelector('.filter-select')?.value || ''
+  );
+}
+
+/**
+ * ========================================
+ * 用户管理模块（仅管理员）
+ * ========================================
+ */
+
+let usersData = [];
+
+// 加载用户列表
+async function loadUsers() {
+  if (currentRole !== 'admin') {
+    document.getElementById('content-area').innerHTML = `
+      <div class="empty-state">
+        <div class="icon">🔒</div>
+        <p>您没有权限访问此模块</p>
+      </div>
+    `;
+    return;
+  }
+  
+  const content = document.getElementById('content-area');
+  content.innerHTML = '<div class="loading">加载中...</div>';
+  
+  try {
+    // 获取所有用户（通过UserRole关联）
+    const result = await bmobQuery(CLASS_NAMES.USER_ROLE, {
+      order: '-createdAt',
+      include: 'user'
+    });
+    
+    usersData = result.data.map(userRole => {
+      const plain = bmobObjectToPlain(userRole);
+      const user = userRole.get('user');
+      if (user) {
+        plain.userId = user.id;
+        plain.userEmail = user.get('email') || '';
+        plain.userUsername = user.get('username') || '';
+      }
+      return plain;
+    });
+    
+    renderUsersList();
+  } catch (err) {
+    console.error('加载用户列表失败:', err);
+    content.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">❌</div>
+        <p>加载失败，请刷新重试</p>
+      </div>
+    `;
+  }
+}
+
+// 渲染用户列表
+function renderUsersList(searchTerm = '') {
+  const content = document.getElementById('content-area');
+  
+  // 筛选数据
+  let filteredData = usersData;
+  if (searchTerm) {
+    const term = searchTerm.toLowerCase();
+    filteredData = usersData.filter(u => 
+      u.userEmail?.toLowerCase().includes(term) ||
+      u.realname?.toLowerCase().includes(term) ||
+      u.userUsername?.toLowerCase().includes(term)
+    );
+  }
+  
+  content.innerHTML = `
+    <div class="module-header">
+      <h2 class="module-title">⚙️ 用户管理</h2>
+      <div class="module-actions">
+        <p style="color: #666; font-size: 14px;">💡 在 Bmob 后台添加用户后，可在此分配角色</p>
+      </div>
+    </div>
+    
+    <div class="search-bar">
+      <input type="text" class="search-input" placeholder="🔍 搜索邮箱或姓名..." 
+             value="${searchTerm}" oninput="searchUsers(this.value)">
+    </div>
+    
+    ${renderUsersTable(filteredData)}
+  `;
+}
+
+// 渲染用户表格
+function renderUsersTable(data) {
+  if (!data || data.length === 0) {
+    return `
+      <div class="empty-state">
+        <div class="icon">👤</div>
+        <p>暂无用户数据</p>
+        <p style="font-size: 14px; margin-top: 12px;">
+          请在 Bmob 后台的「用户」模块中添加用户
+        </p>
+      </div>
+    `;
+  }
+  
+  return `
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>用户</th>
+            <th>邮箱</th>
+            <th>姓名</th>
+            <th>角色</th>
+            <th>注册时间</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${data.map(user => `
+            <tr>
+              <td>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <div class="user-avatar">${(user.realname || user.userUsername || user.userEmail || '?')[0].toUpperCase()}</div>
+                  <span>${user.realname || '-'}</span>
+                </div>
+              </td>
+              <td>${user.userEmail || '-'}</td>
+              <td>${user.realname || '-'}</td>
+              <td>
+                <select class="role-select" onchange="updateUserRole('${user.userId}', this.value)">
+                  <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>管理员</option>
+                  <option value="finance" ${user.role === 'finance' ? 'selected' : ''}>财务</option>
+                  <option value="logistics" ${user.role === 'logistics' ? 'selected' : ''}>物流</option>
+                </select>
+              </td>
+              <td>${formatDateTime(user.createdAt)}</td>
+              <td class="table-actions">
+                <button class="btn-sm btn-secondary" onclick="openUserModal(${JSON.stringify(user).replace(/"/g, '&quot;')})">编辑</button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+// 搜索用户
+const searchUsers = debounce((value) => {
+  renderUsersList(value);
+}, 300);
+
+// 打开用户编辑模态框
+function openUserModal(data) {
+  const title = '✏️ 编辑用户';
+  
+  const roleOptions = [
+    { value: 'admin', label: '管理员' },
+    { value: 'finance', label: '财务' },
+    { value: 'logistics', label: '物流' }
+  ];
+  
+  const fields = [
+    { name: 'user_id', type: 'hidden' },
+    { name: 'realname', label: '姓名', placeholder: '请输入姓名' },
+    { name: 'role', label: '角色 *', type: 'select', options: roleOptions, required: true }
+  ];
+  
+  const formData = {
+    user_id: data.userId,
+    realname: data.realname || '',
+    role: data.role || 'logistics'
+  };
+  
+  const formHTML = `
+    <p style="color: #666; margin-bottom: 16px;">邮箱: ${data.userEmail || '-'}</p>
+    ${generateFormHTML(fields, formData)}
+  `;
+  
+  openModal(title, formHTML, () => saveUser(), false);
+  
+  // 自定义确定按钮
+  const modalFooter = document.getElementById('modal-footer');
+  modalFooter.innerHTML = `
+    <button class="btn-secondary" onclick="closeModal()">取消</button>
+    <button class="btn-primary" onclick="saveUser()">保存</button>
+  `;
+}
+
+// 保存用户信息
+async function saveUser() {
+  const fields = [
+    { name: 'user_id' },
+    { name: 'realname' },
+    { name: 'role', required: true }
+  ];
+  
+  const data = getFormData(fields);
+  
+  if (!data.user_id) {
+    showToast('用户ID无效', 'error');
+    return;
+  }
+  
+  try {
+    await bmobUpsert(CLASS_NAMES.USER_ROLE, 
+      { userId: data.user_id },
+      {
+        role: data.role,
+        realname: data.realname?.trim() || null
+      }
+    );
+    
+    closeModal();
+    showToast('用户信息已更新', 'success');
+    loadUsers();
+  } catch (err) {
+    console.error('保存用户信息失败:', err);
+    showToast('保存失败：' + (err.message || err.error || '未知错误'), 'error');
+  }
+}
+
+// 更新用户角色
+async function updateUserRole(userId, role) {
+  try {
+    await bmobUpsert(CLASS_NAMES.USER_ROLE,
+      { userId: userId },
+      { role: role }
+    );
+    
+    showToast('角色已更新', 'success');
+  } catch (err) {
+    console.error('更新角色失败:', err);
+    showToast('更新失败：' + (err.message || err.error || '未知错误'), 'error');
+    loadUsers(); // 刷新列表
+  }
+}
+  </script>
 </body>
 </html>

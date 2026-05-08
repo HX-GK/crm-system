@@ -1497,6 +1497,7 @@ async function handleLogin(e) {
     });
     
     if (error) {
+      console.error('登录错误:', error);
       errorEl.textContent = error.message || '登录失败';
       return;
     }
@@ -1505,10 +1506,12 @@ async function handleLogin(e) {
       currentUser = data.user;
       await handleLoginSuccess(currentUser);
       showToast('登录成功', 'success');
+    } else {
+      errorEl.textContent = '登录失败：未获取到会话，请确认邮箱已验证';
     }
   } catch (err) {
     console.error('登录异常:', err);
-    errorEl.textContent = '登录异常，请稍后重试';
+    errorEl.textContent = '登录异常：' + (err.message || '请稍后重试');
   }
 }
 

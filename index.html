@@ -1562,7 +1562,7 @@ function debounce(func, wait) {
 async function fetchUserRole(userId) {
   try {
     const result = await bmobQuery(CLASS_NAMES.USER_ROLE, {
-      equalTo: { userId: userId }
+      equalTo: { user: userId }
     });
     
     return result.data?.[0]?.get('role') || 'logistics';
@@ -3920,18 +3920,14 @@ async function loadUsers() {
   try {
     // 获取所有用户（通过UserRole关联）
     const result = await bmobQuery(CLASS_NAMES.USER_ROLE, {
-      order: '-createdAt',
-      include: 'user'
+      order: '-createdAt'
     });
     
     usersData = result.data.map(userRole => {
       const plain = bmobObjectToPlain(userRole);
-      const user = userRole.get('user');
-      if (user) {
-        plain.userId = user.id;
-        plain.userEmail = user.get('email') || '';
-        plain.userUsername = user.get('username') || '';
-      }
+      plain.userId = userRole.get('user') || '';
+      plain.userEmail = '';
+      plain.userUsername = plain.userId;
       return plain;
     });
     
@@ -4095,7 +4091,7 @@ async function saveUser() {
   
   try {
     await bmobUpsert(CLASS_NAMES.USER_ROLE, 
-      { userId: data.user_id },
+      { user: data.user_id },
       {
         role: data.role,
         realname: data.realname?.trim() || null
@@ -4115,7 +4111,7 @@ async function saveUser() {
 async function updateUserRole(userId, role) {
   try {
     await bmobUpsert(CLASS_NAMES.USER_ROLE,
-      { userId: userId },
+      { user: userId },
       { role: role }
     );
     

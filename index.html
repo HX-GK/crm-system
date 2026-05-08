@@ -1691,7 +1691,41 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   
   // 登录表单提交
-  document.getElementById('login-form').addEventListener('submit', handleLogin);
+  // 直接调用登录
+async function testAndLogin() {
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  const errorEl = document.getElementById('login-error');
+  errorEl.textContent = '正在连接...';
+  
+  try {
+    const resp = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await resp.json();
+    if (data.error) {
+      errorEl.textContent = '错误: ' + (data.error_description || data.error.message || JSON.stringify(data.error));
+    } else if (data.access_token) {
+      localStorage.setItem('sb_access_token', data.access_token);
+      localStorage.setItem('sb_refresh_token', data.refresh_token);
+      errorEl.textContent = '登录成功！正在跳转...';
+      errorEl.style.color = 'green';
+      // 简单跳转：刷新页面
+      setTimeout(() => window.location.reload(), 1000);
+    } else {
+      errorEl.textContent = '未知响应: ' + JSON.stringify(data).substring(0, 200);
+    }
+  } catch (err) {
+    errorEl.textContent = '网络错误: ' + err.message + '（Supabase可能无法访问）';
+    errorEl.style.color = 'red';
+  }
+}
+document.getElementById('login-form').addEventListener('submit', handleLogin);
   
   // 退出按钮
   document.getElementById('logout-btn').addEventListener('click', handleLogout);

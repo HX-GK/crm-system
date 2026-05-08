@@ -1007,11 +1007,11 @@ body {
     <span id="toast-message"></span>
   </div>
 
-  <!-- Supabase 客户端 -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- 原生 Fetch API 实现 Supabase 功能（零外部依赖） -->
   <script>
 /**
- * Supabase 客户端配置
+ * Supabase 原生 Fetch API 实现
+ * 使用原生 fetch 替代 Supabase JS SDK，消除 CDN 依赖
  */
 
 // ⚠️ 请替换为你自己的 Supabase 项目 URL
@@ -1020,21 +1020,275 @@ const SUPABASE_URL = 'https://dcxzcpjcivfocpknsku.supabase.co';
 // ⚠️ 请替换为你自己的 Supabase anon public key
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRjeHpjcHhqY2l2Zm9jcGtuc2t1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgyMDkzNzIsImV4cCI6MjA5Mzc4NTM3Mn0.ByjQzzwmP7PThnSM3gNjwDllqksO_NjfEOhNhpqdlmE';
 
-// 初始化 Supabase 客户端
-let supabase = null;
+// 存储桶名称常量
+const STORAGE_BUCKETS = {
+  VOUCHERS: 'vouchers'
+};
 
-function initSupabase() {
-  if (typeof window.supabase !== 'undefined') {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    console.log('✅ Supabase 客户端初始化成功');
-    return true;
-  } else {
-    console.error('❌ Supabase SDK 未加载');
-    return false;
+/**
+ * 认证相关函数
+ */
+
+// 登录
+async function signInWithEmail(email, password) {
+  const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_ANON_KEY,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ email, password })
+  });
+  const data = await response.json();
+  if (data.error) {
+    throw new Error(data.error_description || data.error.message || '登录失败');
+  }
+  return data; // 包含 access_token, refresh_token, user 等
+}
+
+// 获取当前会话
+async function getSession() {
+  const token = localStorage.getItem('sb_access_token');
+  const refreshToken = localStorage.getItem('sb_refresh_token');
+  if (!token) return null;
+  
+  try {
+    // 用 access_token 获取用户信息
+    const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    
+    if (!response.ok) {
+      // token 过期，尝试 refresh
+      if (refreshToken) {
+        try {
+          const refreshed = await refreshToken(refreshToken);
+          return refreshed;
+        } catch(e) {
+          localStorage.removeItem('sb_access_token');
+          localStorage.removeItem('sb_refresh_token');
+          return null;
+        }
+      }
+      localStorage.removeItem('sb_access_token');
+      return null;
+    }
+    
+    const user = await response.json();
+    return { user, access_token: token };
+  } catch (err) {
+    console.error('获取会话失败:', err);
+    return null;
   }
 }
 
-// 检查配置是否正确
+// 刷新 token
+async function refreshToken(refreshToken) {
+  const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_ANON_KEY,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ refresh_token: refreshToken })
+  });
+  const data = await response.json();
+  if (data.error) throw new Error(data.error.message);
+  
+  // 保存新的 token
+  localStorage.setItem('sb_access_token', data.access_token);
+  localStorage.setItem('sb_refresh_token', data.refresh_token);
+  
+  return { user: data.user, access_token: data.access_token };
+}
+
+// 登出
+function signOut() {
+  localStorage.removeItem('sb_access_token');
+  localStorage.removeItem('sb_refresh_token');
+  currentUser = null;
+}
+
+/**
+ * 数据库操作函数
+ */
+
+// 通用查询函数
+async function supabaseQuery(table, options = {}) {
+  const token = localStorage.getItem('sb_access_token');
+  let url = `${SUPABASE_URL}/rest/v1/${table}`;
+  const params = [];
+  
+  if (options.select) params.push(`select=${encodeURIComponent(options.select)}`);
+  if (options.filter) {
+    for (const [key, val] of Object.entries(options.filter)) {
+      params.push(`${encodeURIComponent(key)}=eq.${encodeURIComponent(val)}`);
+    }
+  }
+  if (options.order) params.push(`order=${encodeURIComponent(options.order)}`);
+  if (options.limit) params.push(`limit=${options.limit}`);
+  if (options.offset) params.push(`offset=${options.offset}`);
+  if (options.gte) {
+    for (const [key, val] of Object.entries(options.gte)) {
+      params.push(`${encodeURIComponent(key)}=gte.${encodeURIComponent(val)}`);
+    }
+  }
+  if (options.neq) {
+    for (const [key, val] of Object.entries(options.neq)) {
+      params.push(`${encodeURIComponent(key)}=neq.${encodeURIComponent(val)}`);
+    }
+  }
+  
+  if (params.length) url += '?' + params.join('&');
+  
+  const headers = {
+    'apikey': SUPABASE_ANON_KEY,
+    'Content-Type': 'application/json'
+  };
+  
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  
+  if (options.count) {
+    headers['Prefer'] = 'count=exact';
+  }
+  
+  const fetchOptions = {
+    method: options.method || 'GET',
+    headers
+  };
+  
+  if (options.body && (options.method === 'POST' || options.method === 'PATCH' || options.method === 'PUT')) {
+    fetchOptions.body = JSON.stringify(options.body);
+  }
+  
+  const response = await fetch(url, fetchOptions);
+  
+  if (!response.ok) {
+    try {
+      const err = await response.json();
+      throw new Error(err.message || err.error_description || `请求失败 (${response.status})`);
+    } catch (e) {
+      if (e.message.includes('请求失败')) {
+        throw e;
+      }
+      throw new Error(`请求失败 (${response.status})`);
+    }
+  }
+  
+  if (response.status === 204) return null;
+  
+  // 检查是否有 Prefer header 返回的 count
+  const contentRange = response.headers.get('content-range');
+  const data = await response.json();
+  
+  if (options.count && contentRange) {
+    // content-range 格式: "0-0/100"
+    const match = contentRange.match(/\/(\d+)$/);
+    const count = match ? parseInt(match[1]) : data.length;
+    return { data, count };
+  }
+  
+  return { data, error: null };
+}
+
+// 封装插入操作
+async function supabaseInsert(table, data) {
+  const result = await supabaseQuery(table, {
+    method: 'POST',
+    body: data,
+    select: '*'
+  });
+  return { data: result.data, error: result.error };
+}
+
+// 封装更新操作
+async function supabaseUpdate(table, data, filter) {
+  const options = {
+    method: 'PATCH',
+    body: data,
+    select: '*'
+  };
+  if (filter) {
+    options.filter = filter;
+  }
+  const result = await supabaseQuery(table, options);
+  return { data: result.data, error: result.error };
+}
+
+// 封装删除操作
+async function supabaseDelete(table, filter) {
+  const options = { method: 'DELETE' };
+  if (filter) {
+    options.filter = filter;
+  }
+  const result = await supabaseQuery(table, options);
+  return { data: result.data, error: result.error };
+}
+
+// 获取单条记录
+async function supabaseGet(table, filter) {
+  const options = { filter, limit: 1 };
+  const result = await supabaseQuery(table, options);
+  return { data: result.data?.[0] || null, error: result.error };
+}
+
+// Upsert 操作
+async function supabaseUpsert(table, data) {
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${localStorage.getItem('sb_access_token')}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'resolution=merge-duplicates'
+    },
+    body: JSON.stringify(data)
+  });
+  
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.message || `Upsert 失败 (${response.status})`);
+  }
+  
+  if (response.status === 204) return { data: null, error: null };
+  
+  const data_res = await response.json();
+  return { data: data_res, error: null };
+}
+
+/**
+ * 文件上传
+ */
+async function uploadFile(file, bucket = STORAGE_BUCKETS.VOUCHERS) {
+  const token = localStorage.getItem('sb_access_token');
+  const ext = file.name.split('.').pop();
+  const fileName = `${generateUUID()}.${ext}`;
+  
+  const response = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucket}/${fileName}`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_ANON_KEY,
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': file.type
+    },
+    body: file
+  });
+  
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.message || '文件上传失败');
+  }
+  
+  // 返回公开URL
+  return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${fileName}`;
+}
+
+// 检查配置
 function checkConfig() {
   if (SUPABASE_URL === 'https://your-project-id.supabase.co' || 
       SUPABASE_ANON_KEY === 'your-anon-public-key-here') {
@@ -1043,11 +1297,6 @@ function checkConfig() {
   }
   return true;
 }
-
-// 存储桶名称常量
-const STORAGE_BUCKETS = {
-  VOUCHERS: 'vouchers'
-};
 
 /**
  * 工具函数
@@ -1164,7 +1413,6 @@ function openModal(title, content, onConfirm, showCancel = true) {
   const modalTitle = document.getElementById('modal-title');
   const modalBody = document.getElementById('modal-body');
   const modalFooter = document.getElementById('modal-footer');
-  const confirmBtn = document.getElementById('modal-confirm');
   
   modalTitle.textContent = title;
   modalBody.innerHTML = content;
@@ -1332,18 +1580,16 @@ function debounce(func, wait) {
  */
 async function fetchUserRole(userId) {
   try {
-    const { data, error } = await supabase
-      .from('user_roles')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
+    const result = await supabaseQuery('user_roles', {
+      filter: { user_id: userId }
+    });
     
-    if (error && error.code !== 'PGRST116') {
-      console.error('获取用户角色失败:', error);
+    if (result.error) {
+      console.error('获取用户角色失败:', result.error);
       return 'logistics';
     }
     
-    return data?.role || 'logistics';
+    return result.data?.[0]?.role || 'logistics';
   } catch (err) {
     console.error('获取用户角色异常:', err);
     return 'logistics';
@@ -1386,33 +1632,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
   
-  // 初始化 Supabase
-  if (!initSupabase()) {
-    document.getElementById('login-error').textContent = 'Supabase SDK 加载失败';
-    return;
-  }
-  
   // 检查登录状态
-  const session = await supabase.auth.getSession();
+  const session = await getSession();
   
-  if (session?.session) {
+  if (session?.user) {
     // 已登录
-    currentUser = session.session.user;
+    currentUser = session.user;
     await handleLoginSuccess(currentUser);
   } else {
     // 未登录，显示登录页面
     showLoginPage();
   }
-  
-  // 监听认证状态变化
-  supabase.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session) {
-      currentUser = session.user;
-      await handleLoginSuccess(currentUser);
-    } else if (event === 'SIGNED_OUT') {
-      showLoginPage();
-    }
-  });
   
   // 登录表单提交
   document.getElementById('login-form').addEventListener('submit', handleLogin);
@@ -1490,27 +1720,21 @@ async function handleLogin(e) {
     return;
   }
   
-  // 检查Supabase是否初始化
-  if (!supabase) {
-    errorEl.textContent = 'Supabase未初始化，请检查网络连接后刷新页面';
-    return;
-  }
-  
   errorEl.textContent = '正在登录...';
   
   try {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: email,
-      password: password
-    });
+    const data = await signInWithEmail(email, password);
     
-    if (error) {
-      console.error('登录错误:', error);
-      errorEl.textContent = '登录失败：' + (error.message || '未知错误');
+    if (data.error) {
+      errorEl.textContent = '登录失败：' + (data.error_description || data.error.message || '未知错误');
       return;
     }
     
-    if (data.session) {
+    if (data.access_token && data.user) {
+      // 保存 token 到 localStorage
+      localStorage.setItem('sb_access_token', data.access_token);
+      localStorage.setItem('sb_refresh_token', data.refresh_token);
+      
       currentUser = data.user;
       await handleLoginSuccess(currentUser);
       showToast('登录成功', 'success');
@@ -1526,14 +1750,10 @@ async function handleLogin(e) {
 /**
  * 处理退出登录
  */
-async function handleLogout() {
-  try {
-    await supabase.auth.signOut();
-    showLoginPage();
-    showToast('已退出登录', 'success');
-  } catch (err) {
-    console.error('退出登录失败:', err);
-  }
+function handleLogout() {
+  signOut();
+  showLoginPage();
+  showToast('已退出登录', 'success');
 }
 
 /**
@@ -1719,57 +1939,6 @@ function getFormData(fields) {
 }
 
 /**
- * 上传文件到 Supabase Storage
- */
-async function uploadFile(file, bucket = STORAGE_BUCKETS.VOUCHERS) {
-  try {
-    const ext = file.name.split('.').pop();
-    const fileName = `${generateUUID()}.${ext}`;
-    
-    const { data, error } = await supabase.storage
-      .from(bucket)
-      .upload(fileName, file, {
-        cacheControl: '3600',
-        upsert: false
-      });
-    
-    if (error) throw error;
-    
-    // 获取公开URL
-    const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(fileName);
-    return urlData.publicUrl;
-  } catch (err) {
-    console.error('文件上传失败:', err);
-    throw err;
-  }
-}
-
-/**
- * 加载关联数据下拉选项
- */
-async function loadOptionsForSelect(table, valueField, labelField, existingOptions = []) {
-  try {
-    const { data, error } = await supabase
-      .from(table)
-      .select(`${valueField}, ${labelField}`)
-      .order(labelField);
-    
-    if (error) throw error;
-    
-    return [
-      ...existingOptions,
-      ...(data || []).map(item => ({
-        value: item[valueField],
-        label: item[labelField]
-      }))
-    ];
-  } catch (err) {
-    console.error('加载选项失败:', err);
-    return existingOptions;
-  }
-}
-
-/**
  * 更新时钟
  */
 function updateClock() {
@@ -1905,11 +2074,8 @@ async function loadDashboard() {
 // 获取客户总数
 async function fetchCustomersCount() {
   try {
-    const { count, error } = await supabase
-      .from('customers')
-      .select('*', { count: 'exact', head: true });
-    if (error) throw error;
-    return count || 0;
+    const result = await supabaseQuery('customers', { count: true });
+    return result.count || 0;
   } catch (err) {
     console.error('获取客户数失败:', err);
     return 0;
@@ -1923,12 +2089,11 @@ async function fetchOrdersCount() {
     startOfMonth.setDate(1);
     startOfMonth.setHours(0, 0, 0, 0);
     
-    const { count, error } = await supabase
-      .from('orders')
-      .select('*', { count: 'exact', head: true })
-      .gte('created_at', startOfMonth.toISOString());
-    if (error) throw error;
-    return count || 0;
+    const result = await supabaseQuery('orders', {
+      count: true,
+      gte: { created_at: startOfMonth.toISOString() }
+    });
+    return result.count || 0;
   } catch (err) {
     console.error('获取订单数失败:', err);
     return 0;
@@ -1938,12 +2103,11 @@ async function fetchOrdersCount() {
 // 获取待审核转款数
 async function fetchPendingPaymentsCount() {
   try {
-    const { count, error } = await supabase
-      .from('payments')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'pending');
-    if (error) throw error;
-    return count || 0;
+    const result = await supabaseQuery('payments', {
+      count: true,
+      filter: { status: 'pending' }
+    });
+    return result.count || 0;
   } catch (err) {
     console.error('获取待审核转款数失败:', err);
     return 0;
@@ -1953,12 +2117,11 @@ async function fetchPendingPaymentsCount() {
 // 获取运输中物流数
 async function fetchInTransitCount() {
   try {
-    const { count, error } = await supabase
-      .from('logistics')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'in_transit');
-    if (error) throw error;
-    return count || 0;
+    const result = await supabaseQuery('logistics', {
+      count: true,
+      filter: { status: 'in_transit' }
+    });
+    return result.count || 0;
   } catch (err) {
     console.error('获取运输中物流数失败:', err);
     return 0;
@@ -1968,12 +2131,11 @@ async function fetchInTransitCount() {
 // 获取待结算金额
 async function fetchUnsettledAmount() {
   try {
-    const { data, error } = await supabase
-      .from('finance')
-      .select('unpaid_amount')
-      .neq('settlement_status', 'settled');
-    if (error) throw error;
-    return (data || []).reduce((sum, item) => sum + (parseFloat(item.unpaid_amount) || 0), 0);
+    const result = await supabaseQuery('finance', {
+      select: 'unpaid_amount',
+      neq: { settlement_status: 'settled' }
+    });
+    return (result.data || []).reduce((sum, item) => sum + (parseFloat(item.unpaid_amount) || 0), 0);
   } catch (err) {
     console.error('获取待结算金额失败:', err);
     return 0;
@@ -1983,16 +2145,12 @@ async function fetchUnsettledAmount() {
 // 获取最近订单
 async function fetchRecentOrders() {
   try {
-    const { data, error } = await supabase
-      .from('orders')
-      .select(`
-        *,
-        customers (name)
-      `)
-      .order('created_at', { ascending: false })
-      .limit(10);
-    if (error) throw error;
-    return data || [];
+    const result = await supabaseQuery('orders', {
+      select: '*, customers (name)',
+      order: 'created_at.desc',
+      limit: 10
+    });
+    return result.data || [];
   } catch (err) {
     console.error('获取最近订单失败:', err);
     return [];
@@ -2067,14 +2225,14 @@ async function loadCustomers() {
   content.innerHTML = '<div class="loading">加载中...</div>';
   
   try {
-    const { data, error } = await supabase
-      .from('customers')
-      .select('*')
-      .order('created_at', { ascending: false });
+    const result = await supabaseQuery('customers', {
+      select: '*',
+      order: 'created_at.desc'
+    });
     
-    if (error) throw error;
+    if (result.error) throw new Error(result.error);
     
-    customersData = data || [];
+    customersData = result.data || [];
     
     renderCustomersList();
   } catch (err) {
@@ -2221,19 +2379,14 @@ async function saveCustomer() {
     
     if (data.id) {
       // 更新
-      result = await supabase
-        .from('customers')
-        .update(customerData)
-        .eq('id', data.id);
+      result = await supabaseUpdate('customers', customerData, { id: data.id });
     } else {
       // 新增
       customerData.created_by = currentUser.id;
-      result = await supabase
-        .from('customers')
-        .insert(customerData);
+      result = await supabaseInsert('customers', customerData);
     }
     
-    if (result.error) throw result.error;
+    if (result.error) throw new Error(result.error);
     
     closeModal();
     showToast(data.id ? '客户更新成功' : '客户添加成功', 'success');
@@ -2248,12 +2401,8 @@ async function saveCustomer() {
 function deleteCustomer(id) {
   confirm('确定要删除该客户吗？相关订单数据将保留。', async () => {
     try {
-      const { error } = await supabase
-        .from('customers')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw error;
+      const result = await supabaseDelete('customers', { id: id });
+      if (result.error) throw new Error(result.error);
       
       showToast('客户已删除', 'success');
       loadCustomers();
@@ -2300,24 +2449,21 @@ async function loadOrders() {
   
   try {
     // 获取客户选项
-    const { data: customers } = await supabase
-      .from('customers')
-      .select('id, name')
-      .order('name');
-    customersOptions = customers || [];
+    const customersResult = await supabaseQuery('customers', {
+      select: 'id, name',
+      order: 'name'
+    });
+    customersOptions = customersResult.data || [];
     
     // 获取订单列表
-    const { data, error } = await supabase
-      .from('orders')
-      .select(`
-        *,
-        customers (id, name)
-      `)
-      .order('created_at', { ascending: false });
+    const result = await supabaseQuery('orders', {
+      select: '*, customers (id, name)',
+      order: 'created_at.desc'
+    });
     
-    if (error) throw error;
+    if (result.error) throw new Error(result.error);
     
-    ordersData = data || [];
+    ordersData = result.data || [];
     
     renderOrdersList();
   } catch (err) {
@@ -2530,21 +2676,16 @@ async function saveOrder() {
     
     if (data.id) {
       // 更新
-      result = await supabase
-        .from('orders')
-        .update(orderData)
-        .eq('id', data.id);
+      result = await supabaseUpdate('orders', orderData, { id: data.id });
     } else {
       // 新增
       orderData.status = 'pending';
       orderData.created_by = currentUser.id;
       orderData.order_time = new Date().toISOString();
-      result = await supabase
-        .from('orders')
-        .insert(orderData);
+      result = await supabaseInsert('orders', orderData);
     }
     
-    if (result.error) throw result.error;
+    if (result.error) throw new Error(result.error);
     
     closeModal();
     showToast(data.id ? '订单更新成功' : '订单创建成功', 'success');
@@ -2559,12 +2700,8 @@ async function saveOrder() {
 function deleteOrder(id) {
   confirm('确定要删除该订单吗？', async () => {
     try {
-      const { error } = await supabase
-        .from('orders')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw error;
+      const result = await supabaseDelete('orders', { id: id });
+      if (result.error) throw new Error(result.error);
       
       showToast('订单已删除', 'success');
       loadOrders();
@@ -2622,24 +2759,21 @@ async function loadPayments() {
   
   try {
     // 获取订单选项
-    const { data: orders } = await supabase
-      .from('orders')
-      .select('id, order_no, amount')
-      .order('created_at', { ascending: false });
-    ordersOptions = orders || [];
+    const ordersResult = await supabaseQuery('orders', {
+      select: 'id, order_no, amount',
+      order: 'created_at.desc'
+    });
+    ordersOptions = ordersResult.data || [];
     
     // 获取转款记录
-    const { data, error } = await supabase
-      .from('payments')
-      .select(`
-        *,
-        orders (id, order_no, amount, customers (name))
-      `)
-      .order('created_at', { ascending: false });
+    const result = await supabaseQuery('payments', {
+      select: '*, orders (id, order_no, amount, customers (name))',
+      order: 'created_at.desc'
+    });
     
-    if (error) throw error;
+    if (result.error) throw new Error(result.error);
     
-    paymentsData = data || [];
+    paymentsData = result.data || [];
     
     renderPaymentsList();
   } catch (err) {
@@ -2844,26 +2978,18 @@ async function savePayment() {
     
     if (data.id) {
       // 更新
-      result = await supabase
-        .from('payments')
-        .update(paymentData)
-        .eq('id', data.id);
+      result = await supabaseUpdate('payments', paymentData, { id: data.id });
     } else {
       // 新增
       paymentData.created_by = currentUser.id;
-      result = await supabase
-        .from('payments')
-        .insert(paymentData);
+      result = await supabaseInsert('payments', paymentData);
     }
     
-    if (result.error) throw result.error;
+    if (result.error) throw new Error(result.error);
     
     // 如果状态是 confirmed，同时更新订单状态
     if (paymentData.status === 'confirmed') {
-      await supabase
-        .from('orders')
-        .update({ status: 'paid' })
-        .eq('id', data.order_id);
+      await supabaseUpdate('orders', { status: 'paid' }, { id: data.order_id });
     }
     
     closeModal();
@@ -2880,22 +3006,16 @@ async function confirmPayment(payment) {
   confirm('确认该转款记录吗？', async () => {
     try {
       // 更新转款状态
-      const { error } = await supabase
-        .from('payments')
-        .update({
-          status: 'confirmed',
-          reviewed_by: currentUser.id,
-          reviewed_at: new Date().toISOString()
-        })
-        .eq('id', payment.id);
+      const result = await supabaseUpdate('payments', {
+        status: 'confirmed',
+        reviewed_by: currentUser.id,
+        reviewed_at: new Date().toISOString()
+      }, { id: payment.id });
       
-      if (error) throw error;
+      if (result.error) throw new Error(result.error);
       
       // 更新关联订单状态
-      await supabase
-        .from('orders')
-        .update({ status: 'paid' })
-        .eq('id', payment.order_id);
+      await supabaseUpdate('orders', { status: 'paid' }, { id: payment.order_id });
       
       showToast('转款已确认', 'success');
       loadPayments();
@@ -2910,16 +3030,13 @@ async function confirmPayment(payment) {
 async function rejectPayment(payment) {
   confirm('拒绝该转款记录吗？', async () => {
     try {
-      const { error } = await supabase
-        .from('payments')
-        .update({
-          status: 'rejected',
-          reviewed_by: currentUser.id,
-          reviewed_at: new Date().toISOString()
-        })
-        .eq('id', payment.id);
+      const result = await supabaseUpdate('payments', {
+        status: 'rejected',
+        reviewed_by: currentUser.id,
+        reviewed_at: new Date().toISOString()
+      }, { id: payment.id });
       
-      if (error) throw error;
+      if (result.error) throw new Error(result.error);
       
       showToast('转款已拒绝', 'success');
       loadPayments();
@@ -2980,24 +3097,21 @@ async function loadLogistics() {
   
   try {
     // 获取订单选项（包含客户信息）
-    const { data: orders } = await supabase
-      .from('orders')
-      .select('id, order_no, customers (name)')
-      .order('created_at', { ascending: false });
-    logisticsOrdersOptions = orders || [];
+    const ordersResult = await supabaseQuery('orders', {
+      select: 'id, order_no, customers (name)',
+      order: 'created_at.desc'
+    });
+    logisticsOrdersOptions = ordersResult.data || [];
     
     // 获取物流记录
-    const { data, error } = await supabase
-      .from('logistics')
-      .select(`
-        *,
-        orders (id, order_no, customers (name))
-      `)
-      .order('created_at', { ascending: false });
+    const result = await supabaseQuery('logistics', {
+      select: '*, orders (id, order_no, customers (name))',
+      order: 'created_at.desc'
+    });
     
-    if (error) throw error;
+    if (result.error) throw new Error(result.error);
     
-    logisticsData = data || [];
+    logisticsData = result.data || [];
     
     renderLogisticsList();
   } catch (err) {
@@ -3180,7 +3294,7 @@ async function saveLogistics() {
   }
   
   try {
-    const logisticsData = {
+    const logisticsRecordData = {
       order_id: data.order_id,
       driver_name: data.driver_name.trim(),
       plate_number: data.plate_number?.trim() || null,
@@ -3191,33 +3305,25 @@ async function saveLogistics() {
     };
     
     if (data.dispatch_time) {
-      logisticsData.dispatch_time = new Date(data.dispatch_time).toISOString();
+      logisticsRecordData.dispatch_time = new Date(data.dispatch_time).toISOString();
     }
     
     let result;
     
     if (data.id) {
       // 更新
-      result = await supabase
-        .from('logistics')
-        .update(logisticsData)
-        .eq('id', data.id);
+      result = await supabaseUpdate('logistics', logisticsRecordData, { id: data.id });
     } else {
       // 新增
-      logisticsData.created_by = currentUser.id;
-      result = await supabase
-        .from('logistics')
-        .insert(logisticsData);
+      logisticsRecordData.created_by = currentUser.id;
+      result = await supabaseInsert('logistics', logisticsRecordData);
     }
     
-    if (result.error) throw result.error;
+    if (result.error) throw new Error(result.error);
     
     // 如果状态变更，同时更新订单状态
-    if (logisticsData.status === 'in_transit') {
-      await supabase
-        .from('orders')
-        .update({ status: 'shipped' })
-        .eq('id', data.order_id);
+    if (logisticsRecordData.status === 'in_transit') {
+      await supabaseUpdate('orders', { status: 'shipped' }, { id: data.order_id });
     }
     
     closeModal();
@@ -3245,22 +3351,16 @@ async function updateLogisticsStatus(logistics) {
   
   confirm(confirmMsg, async () => {
     try {
-      const { error } = await supabase
-        .from('logistics')
-        .update({
-          status: newStatus,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', logistics.id);
+      const result = await supabaseUpdate('logistics', {
+        status: newStatus,
+        updated_at: new Date().toISOString()
+      }, { id: logistics.id });
       
-      if (error) throw error;
+      if (result.error) throw new Error(result.error);
       
       // 如果是送达，同时更新订单状态
       if (newStatus === 'delivered') {
-        await supabase
-          .from('orders')
-          .update({ status: 'settled' })
-          .eq('id', logistics.order_id);
+        await supabaseUpdate('orders', { status: 'settled' }, { id: logistics.order_id });
       }
       
       showToast('状态已更新', 'success');
@@ -3326,24 +3426,21 @@ async function loadFinance() {
   
   try {
     // 获取订单选项
-    const { data: orders } = await supabase
-      .from('orders')
-      .select('id, order_no, amount, customers (name)')
-      .order('created_at', { ascending: false });
-    financeOrdersOptions = orders || [];
+    const ordersResult = await supabaseQuery('orders', {
+      select: 'id, order_no, amount, customers (name)',
+      order: 'created_at.desc'
+    });
+    financeOrdersOptions = ordersResult.data || [];
     
     // 获取财务记录
-    const { data, error } = await supabase
-      .from('finance')
-      .select(`
-        *,
-        orders (id, order_no, amount, customers (name))
-      `)
-      .order('created_at', { ascending: false });
+    const result = await supabaseQuery('finance', {
+      select: '*, orders (id, order_no, amount, customers (name))',
+      order: 'created_at.desc'
+    });
     
-    if (error) throw error;
+    if (result.error) throw new Error(result.error);
     
-    financeData = data || [];
+    financeData = result.data || [];
     
     renderFinanceList();
   } catch (err) {
@@ -3475,13 +3572,11 @@ async function openFinanceModal(data = null) {
   // 获取已确认的付款金额
   let paidAmount = 0;
   if (data?.order_id) {
-    const { data: payments } = await supabase
-      .from('payments')
-      .select('amount')
-      .eq('order_id', data.order_id)
-      .eq('status', 'confirmed');
-    
-    paidAmount = (payments || []).reduce((sum, p) => sum + parseFloat(p.amount), 0);
+    const paymentsResult = await supabaseQuery('payments', {
+      select: 'amount',
+      filter: { order_id: data.order_id, status: 'confirmed' }
+    });
+    paidAmount = (paymentsResult.data || []).reduce((sum, p) => sum + parseFloat(p.amount), 0);
   }
   
   const fields = [
@@ -3526,13 +3621,12 @@ async function openFinanceModal(data = null) {
       totalInput.value = order.amount;
       
       // 获取该订单已确认的付款
-      const { data: payments } = await supabase
-        .from('payments')
-        .select('amount')
-        .eq('order_id', orderId)
-        .eq('status', 'confirmed');
+      const paymentsResult = await supabaseQuery('payments', {
+        select: 'amount',
+        filter: { order_id: orderId, status: 'confirmed' }
+      });
       
-      const paid = (payments || []).reduce((sum, p) => sum + parseFloat(p.amount), 0);
+      const paid = (paymentsResult.data || []).reduce((sum, p) => sum + parseFloat(p.amount), 0);
       document.getElementById('field-paid_amount_display').value = paid.toFixed(2);
       
       const total = parseFloat(order.amount) || 0;
@@ -3579,16 +3673,15 @@ async function saveFinance() {
   
   try {
     // 计算已付金额（从已确认的付款记录汇总）
-    const { data: payments } = await supabase
-      .from('payments')
-      .select('amount')
-      .eq('order_id', data.order_id)
-      .eq('status', 'confirmed');
+    const paymentsResult = await supabaseQuery('payments', {
+      select: 'amount',
+      filter: { order_id: data.order_id, status: 'confirmed' }
+    });
     
-    const paidAmount = (payments || []).reduce((sum, p) => sum + parseFloat(p.amount), 0);
+    const paidAmount = (paymentsResult.data || []).reduce((sum, p) => sum + parseFloat(p.amount), 0);
     const unpaidAmount = totalAmount - paidAmount;
     
-    const financeData = {
+    const financeRecordData = {
       order_id: data.order_id,
       total_amount: totalAmount,
       paid_amount: paidAmount,
@@ -3603,19 +3696,14 @@ async function saveFinance() {
     
     if (data.id) {
       // 更新
-      result = await supabase
-        .from('finance')
-        .update(financeData)
-        .eq('id', data.id);
+      result = await supabaseUpdate('finance', financeRecordData, { id: data.id });
     } else {
       // 新增
-      financeData.created_by = currentUser.id;
-      result = await supabase
-        .from('finance')
-        .insert(financeData);
+      financeRecordData.created_by = currentUser.id;
+      result = await supabaseInsert('finance', financeRecordData);
     }
     
-    if (result.error) throw result.error;
+    if (result.error) throw new Error(result.error);
     
     closeModal();
     showToast(data.id ? '结算记录已更新' : '结算记录已创建', 'success');
@@ -3689,17 +3777,14 @@ async function loadUsers() {
   
   try {
     // 获取所有用户（通过user_roles关联）
-    const { data, error } = await supabase
-      .from('user_roles')
-      .select(`
-        *,
-        user:user_id (id, email)
-      `)
-      .order('created_at', { ascending: false });
+    const result = await supabaseQuery('user_roles', {
+      select: '*, user:user_id (id, email)',
+      order: 'created_at.desc'
+    });
     
-    if (error) throw error;
+    if (result.error) throw new Error(result.error);
     
-    usersData = data || [];
+    usersData = result.data || [];
     
     renderUsersList();
   } catch (err) {
@@ -3859,15 +3944,13 @@ async function saveUser() {
   }
   
   try {
-    const { error } = await supabase
-      .from('user_roles')
-      .upsert({
-        user_id: data.user_id,
-        role: data.role,
-        realname: data.realname?.trim() || null
-      });
+    const result = await supabaseUpsert('user_roles', {
+      user_id: data.user_id,
+      role: data.role,
+      realname: data.realname?.trim() || null
+    });
     
-    if (error) throw error;
+    if (result.error) throw new Error(result.error);
     
     closeModal();
     showToast('用户信息已更新', 'success');
@@ -3881,12 +3964,9 @@ async function saveUser() {
 // 更新用户角色
 async function updateUserRole(userId, role) {
   try {
-    const { error } = await supabase
-      .from('user_roles')
-      .update({ role: role })
-      .eq('user_id', userId);
+    const result = await supabaseUpdate('user_roles', { role: role }, { user_id: userId });
     
-    if (error) throw error;
+    if (result.error) throw new Error(result.error);
     
     showToast('角色已更新', 'success');
   } catch (err) {

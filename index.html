@@ -916,7 +916,7 @@ body {
           <label for="password">🔒 密码</label>
           <input type="password" id="password" placeholder="请输入密码" required>
         </div>
-        <button type="submit" class="btn-primary">登 录</button>
+        <button type="submit" class="btn-primary" id="login-btn">登 录</button>
         <div id="login-error" class="error-message"></div>
       </form>
       <div class="login-footer">
@@ -1699,6 +1699,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   // 登录表单提交
   document.getElementById('login-form').addEventListener('submit', handleLogin);
+  
+  // 备用：直接绑定按钮点击
+  document.getElementById('login-btn').addEventListener('click', function(e) {
+    // 如果form submit没触发，手动调用
+    if (!e.defaultPrevented) {
+      handleLogin(e);
+    }
+  });
   
   // 退出按钮
   document.getElementById('logout-btn').addEventListener('click', handleLogout);
